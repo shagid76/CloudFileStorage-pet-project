@@ -1,4 +1,4 @@
-package us.yarik.cloudFileStorage.controller;
+package us.yarik.CloudFileStorage.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -7,9 +7,9 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
-import us.yarik.cloudFileStorage.exception.ConflictException;
-import us.yarik.cloudFileStorage.model.User;
-import us.yarik.cloudFileStorage.service.UserService;
+import us.yarik.CloudFileStorage.exception.ConflictException;
+import us.yarik.CloudFileStorage.model.User;
+import us.yarik.CloudFileStorage.service.UserService;
 
 @Controller
 public class LoginController {

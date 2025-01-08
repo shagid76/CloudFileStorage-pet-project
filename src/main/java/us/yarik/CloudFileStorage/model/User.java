@@ -1,4 +1,4 @@
-package us.yarik.cloudFileStorage.model;
+package us.yarik.CloudFileStorage.model;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

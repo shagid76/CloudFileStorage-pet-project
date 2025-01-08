@@ -1,12 +1,12 @@
-package us.yarik.cloudFileStorage.security;
+package us.yarik.CloudFileStorage.security;
 
 import lombok.AllArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-import us.yarik.cloudFileStorage.model.User;
-import us.yarik.cloudFileStorage.repository.UserRepository;
+import us.yarik.CloudFileStorage.model.User;
+import us.yarik.CloudFileStorage.repository.UserRepository;
 
 @Service
 @AllArgsConstructor

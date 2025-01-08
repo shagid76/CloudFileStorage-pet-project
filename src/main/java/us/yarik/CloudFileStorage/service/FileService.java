@@ -1,8 +1,7 @@
-package us.yarik.cloudFileStorage.service;
+package us.yarik.CloudFileStorage.service;
 
 import io.minio.*;
 import io.minio.errors.*;
-import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;

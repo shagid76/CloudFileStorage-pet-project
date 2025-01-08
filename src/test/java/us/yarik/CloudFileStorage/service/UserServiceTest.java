@@ -1,23 +1,21 @@
-package us.yarik.cloudFileStorage.service;
+package us.yarik.CloudFileStorage.service;
 
-import jakarta.validation.Valid;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import us.yarik.cloudFileStorage.model.User;
-import us.yarik.cloudFileStorage.repository.UserRepository;
+import us.yarik.CloudFileStorage.model.User;
+import us.yarik.CloudFileStorage.repository.UserRepository;
 
 import java.util.Optional;
-import java.util.WeakHashMap;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
-import static us.yarik.cloudFileStorage.service.UserServiceTest.TestResources.*;
+import static us.yarik.CloudFileStorage.service.UserServiceTest.TestResources.*;
 
 @ExtendWith(MockitoExtension.class)
 public class UserServiceTest {

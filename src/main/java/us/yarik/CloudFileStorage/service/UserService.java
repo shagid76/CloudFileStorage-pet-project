@@ -1,11 +1,11 @@
-package us.yarik.cloudFileStorage.service;
+package us.yarik.CloudFileStorage.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import us.yarik.cloudFileStorage.exception.ConflictException;
-import us.yarik.cloudFileStorage.model.User;
-import us.yarik.cloudFileStorage.repository.UserRepository;
+import us.yarik.CloudFileStorage.exception.ConflictException;
+import us.yarik.CloudFileStorage.model.User;
+import us.yarik.CloudFileStorage.repository.UserRepository;
 
 import java.util.Optional;
 

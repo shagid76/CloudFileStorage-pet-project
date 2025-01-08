@@ -1,8 +1,8 @@
-package us.yarik.cloudFileStorage.repository;
+package us.yarik.CloudFileStorage.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import us.yarik.cloudFileStorage.model.User;
+import us.yarik.CloudFileStorage.model.User;
 
 import java.util.Optional;
 

@@ -1,4 +1,4 @@
-package us.yarik.cloudFileStorage.dto;
+package us.yarik.CloudFileStorage.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

@@ -1,4 +1,4 @@
-package us.yarik.cloudFileStorage;
+package us.yarik.CloudFileStorage;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

@@ -1,4 +1,4 @@
-package us.yarik.cloudFileStorage;
+package us.yarik.CloudFileStorage;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
