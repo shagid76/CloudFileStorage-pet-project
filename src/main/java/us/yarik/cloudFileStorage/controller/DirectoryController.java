@@ -34,6 +34,7 @@ public class DirectoryController {
 
     @GetMapping("/directory/{email}")
     public String viewUserBuckets(@PathVariable("email") String email, Model model) {
+        //coo
         List<String> buckets = fileService.getBucketsForUser(email);
         Optional<User> user = userService.findByEmail(email);
         model.addAttribute("buckets", buckets);
