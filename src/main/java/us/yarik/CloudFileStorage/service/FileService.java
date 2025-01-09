@@ -47,12 +47,13 @@ public class FileService {
 
 //commit
 
-    public void createBucket(String userInput) throws NoSuchAlgorithmException, InvalidKeyException {
+    public void createBucket(String userInput, String email) throws NoSuchAlgorithmException, InvalidKeyException {
         if (!doesBucketExist(userInput)) {
             try {
+                String userBucketName = email.substring(0, email.indexOf("@")) + "-" + userInput;
 
                 minioClient.makeBucket(MakeBucketArgs.builder()
-                        .bucket(userInput)
+                        .bucket(userBucketName)
                         .build());
 
             } catch (ErrorResponseException e) {
@@ -79,7 +80,7 @@ public class FileService {
             minioClient.listBuckets().forEach(bucket -> bucketNames.add(bucket.name()));
 
             return bucketNames.stream()
-                    .filter(bucketName -> bucketName.contains(email.toLowerCase()))
+                    .filter(bucketName -> bucketName.contains(email.substring(0, email.indexOf("@"))))
                     .collect(Collectors.toList());
         } catch (Exception e) {
             throw new RuntimeException("Error retrieving buckets: " + e.getMessage(), e);
@@ -88,12 +89,10 @@ public class FileService {
 
     public boolean doesBucketExist(String bucketName) {
         try {
-            // Получаем список всех бакетов и проверяем, существует ли бакет с нужным именем
             return minioClient.listBuckets().stream()
                     .anyMatch(bucket -> bucket.name().equals(bucketName));
         } catch (Exception e) {
-            // Обработка ошибок при попытке получить список бакетов
-            throw new RuntimeException("Error checking if bucket exists: " + e.getMessage(), e);
+            throw new IllegalArgumentException();
         }
     }
 
@@ -127,4 +126,5 @@ public class FileService {
             throw new RuntimeException("Error: " + e.getMessage());
         }
     }
+
 }

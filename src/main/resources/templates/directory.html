@@ -11,16 +11,16 @@
         <div class="row justify-content-center mt-4">
             <div class="col-md-8">
                 <div class="card p-4">
-                    <h3 class="text-center">Ваши бакеты</h3>
+                    <h3 class="text-center">Your buckets.</h3>
                     <div th:if="${buckets != null}">
                         <ul class="list-group">
                             <li th:each="bucket : ${buckets}" class="list-group-item">
-                                <span th:text="${bucket}"></span>
+                                <a class="btn bth-primary" th:href="@{/bucket/{email}/{bucket}(email = ${user.email}, bucket = ${bucket})}"><span th:text="${bucket}"></span></a>
                             </li>
                         </ul>
                     </div>
                     <div th:if="${buckets == null}">
-                        <p class="text-center">У вас нет бакетов.</p>
+                        <p class="text-center">You don't have buckets.</p>
                     </div>
                     <a class="btn btn-primary" th:href="@{/create/{email}(email = ${user.email})}">Create bucket</a>
                 </div>
@@ -32,7 +32,7 @@
                 <div class="card p-4">
                     <form name="logoutForm" th:action="@{/logout}" method="post">
                         <input type="hidden" name="_csrf" th:value="${_csrf.token}">
-                        <button class="btn btn-danger w-100" type="submit">Выйти</button>
+                        <button class="btn btn-danger w-100" type="submit">Logout</button>
                     </form>
                 </div>
             </div>

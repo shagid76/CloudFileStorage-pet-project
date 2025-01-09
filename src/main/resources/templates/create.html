@@ -19,6 +19,9 @@
                             <input type="text" id="bucketName" name="bucketName" class="form-control" placeholder="Введите название бакета" required>
                         </div>
                         <button type="submit" class="btn btn-primary w-100">Создать</button>
+                        <div class="alert alert-danger" role="alert" th:if="${error}">
+                            <p>Bucket already exist.</p>
+                        </div>
                     </form>
                 </div>
             </div>

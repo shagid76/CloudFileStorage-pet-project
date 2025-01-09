@@ -33,7 +33,6 @@ public class DirectoryController {
 
     @GetMapping("/directory/{email}")
     public String viewUserBuckets(@PathVariable("email") String email, Model model) {
-        //coo
         List<String> buckets = fileService.getBucketsForUser(email);
         Optional<User> user = userService.findByEmail(email);
         if(user.isPresent()) {
@@ -55,13 +54,36 @@ public class DirectoryController {
     }
 
     @PostMapping("/create/{email}")
-    public String createUserStorage(@PathVariable("email") String email, @ModelAttribute("bucketName") String bucketName){
+    public String createUserStorage(@PathVariable("email") String email, @ModelAttribute("bucketName") String bucketName,
+                                    Model model){
         try {
             fileService.createBucket(bucketName, email);
             return "redirect:/directory/" + email;
         }catch (Exception e){
-            throw new RuntimeException("Error: " + e.getMessage());
+            Optional<User> user = userService.findByEmail(email);
+            if (user.isPresent()) {
+                model.addAttribute("user", user.get());
+                model.addAttribute("error", e.getMessage());
+                return "create";
+            }
+            return "redirect:/directory/" + email;
         }
+    }
+
+    @GetMapping("/bucket/{email}/{bucketName}")
+    public String bucketGet(@PathVariable("email") String email,@PathVariable("bucketName") String bucketName,
+                            Model model){
+        //find all objects
+        Optional<User> user = userService.findByEmail(email);
+        if (user.isPresent()) {
+            //model.addAttribute("objects", objects);
+
+            model.addAttribute("user", user.get());
+            model.addAttribute("bucketName", bucketName);
+            return "bucket";
+        }
+        return "redirect:/directory/" + email;
+
     }
 
 }

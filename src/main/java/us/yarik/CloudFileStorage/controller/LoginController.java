@@ -32,7 +32,6 @@ public class LoginController {
         model.addAttribute("user", new User());
         return "registration";
     }
-    //TODO Fix http status
     @PostMapping("/registration")
     public String registrationPost(@ModelAttribute("user") User user, Model model, BindingResult bindingResult){
         if(bindingResult.hasErrors()){
