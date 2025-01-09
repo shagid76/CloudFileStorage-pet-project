@@ -22,10 +22,11 @@
                     <div th:if="${buckets == null}">
                         <p class="text-center">У вас нет бакетов.</p>
                     </div>
+                    <a class="btn btn-primary" th:href="@{/create/{email}(email = ${user.email})}">Create bucket</a>
                 </div>
             </div>
         </div>
-        <button class="btn"><a th:href="@{/create/{email}(email = ${user.email})}">Create bucket</a>></button>
+
         <div class="row justify-content-center mt-4">
             <div class="col-md-4">
                 <div class="card p-4">

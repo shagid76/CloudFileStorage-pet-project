@@ -36,23 +36,29 @@ public class DirectoryController {
         //coo
         List<String> buckets = fileService.getBucketsForUser(email);
         Optional<User> user = userService.findByEmail(email);
-        model.addAttribute("buckets", buckets);
-        model.addAttribute("user", user.get());
-        return "directory";
+        if(user.isPresent()) {
+            model.addAttribute("buckets", buckets);
+            model.addAttribute("user", user.get());
+            return "directory";
+        }
+        return "redirect:/login";
     }
 
     @GetMapping("/create/{email}")
     public String createGet(@PathVariable("email") String email, Model model){
         Optional<User> user = userService.findByEmail(email);
-        model.addAttribute("user", user.get());
-        return "create";
+        if(user.isPresent()) {
+            model.addAttribute("user", user.get());
+            return "create";
+        }
+        return "redirect:/directory/" + email;
     }
 
     @PostMapping("/create/{email}")
     public String createUserStorage(@PathVariable("email") String email, @ModelAttribute("bucketName") String bucketName){
         try {
-            fileService.createBucket(bucketName);
-            return "directory";
+            fileService.createBucket(bucketName, email);
+            return "redirect:/directory/" + email;
         }catch (Exception e){
             throw new RuntimeException("Error: " + e.getMessage());
         }
