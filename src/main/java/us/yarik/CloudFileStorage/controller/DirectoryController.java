@@ -87,6 +87,7 @@ public class DirectoryController {
             model.addAttribute("objects", objects);
             model.addAttribute("user", user.get());
             model.addAttribute("bucketName", bucketName);
+            model.addAttribute("newBucketName", new String());
             return "bucket";
         }
         return "redirect:/directory/" + email;
@@ -122,6 +123,13 @@ public class DirectoryController {
         return "redirect:/directory/" + email;
     }
 
-
+    @PostMapping("/update/{email}/{bucketName}")
+    public String updateBucket(@PathVariable("email") String email, @PathVariable("bucketName") String oldBucketName,
+                               @ModelAttribute("newBucketName") String newBucketName) throws Exception {
+        System.out.println( email + " " + oldBucketName + " " + newBucketName);
+        fileService.createBucket(newBucketName, email);
+        fileService.changeBucketName(oldBucketName, newBucketName);
+        return "redirect:/directory/"  + email;
+    }
 
 }

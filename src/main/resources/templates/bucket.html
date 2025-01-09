@@ -29,10 +29,26 @@
             </div>
         </div>
 
+
+        <div class="row justify-content-center mt-5">
+            <div class="col-md-5">
+                <div class="card p-5">
+                    <form  method="post"
+                          th:action="@{/update/{email}/{bucketName}(email = ${user.email}, bucketName = ${bucketName})}">
+                        <label for="newBucketName">Change name:</label>
+                        <input type="text" id="newBucketName" name="newBucketName">
+                        <button class="btn btn-primary" type="submit">Submit</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+
         <div class="row justify-content-center mt-4">
             <div class="col-md-4">
                 <div class="card p-4">
-                    <form method="post" th:action="@{/delete/{email}/{bucketName}(email = ${user.email}, bucketName = ${bucketName})}">
+                    <form method="post"
+                          th:action="@{/delete/{email}/{bucketName}(email = ${user.email}, bucketName = ${bucketName})}">
                         <input type="hidden" name="_method" value="delete">
                         <button class="btn btn-danger w-100" type="submit">Delete Bucket</button>
                     </form>

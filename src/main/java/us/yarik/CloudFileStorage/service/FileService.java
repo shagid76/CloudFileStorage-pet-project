@@ -120,17 +120,17 @@ public class FileService {
                 .build());
     }
 
-    public List<String> allObjectsOnBucket(String bucketName) throws Exception{
-        Iterable<Result<Item>> result =  minioClient.listObjects(ListObjectsArgs.builder()
+    public List<String> allObjectsOnBucket(String bucketName) throws Exception {
+        Iterable<Result<Item>> result = minioClient.listObjects(ListObjectsArgs.builder()
                 .bucket(bucketName)
                 .build());
         List<String> objects = new ArrayList<>();
-        for(Result<Item>  itemResult : result){
-            try{
+        for (Result<Item> itemResult : result) {
+            try {
                 Item item = itemResult.get();
                 String fileName = item.objectName();
                 objects.add(fileName);
-            }catch (Exception e){
+            } catch (Exception e) {
                 throw new Exception("error " + e.getMessage());
             }
         }
@@ -160,8 +160,25 @@ public class FileService {
                 .build());
     }
 
-//    public void changeBucketName(String bucketName){
-//        minioClient.
-//    }
+    public void changeBucketName(String oldBucketName, String newBucketName) throws Exception {
+        List<String> objects = allObjectsOnBucket(oldBucketName);
+        for (String objectName : objects) {
+            InputStream inputStream = minioClient.getObject(GetObjectArgs.builder()
+                    .bucket(oldBucketName)
+                    .object(objectName)
+                    .build());
+                minioClient.putObject(PutObjectArgs.builder()
+                        .bucket(newBucketName)
+                        .object(objectName)
+                        .stream(inputStream, -1, 10485760)
+                        .build());
+
+            minioClient.removeObject(RemoveObjectArgs.builder()
+                    .bucket(oldBucketName)
+                    .object(objectName)
+                    .build());
+        }
+        deleteBucket(oldBucketName);
+    }
 
 }
