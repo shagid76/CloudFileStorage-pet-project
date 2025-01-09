@@ -2,6 +2,9 @@ package us.yarik.CloudFileStorage.service;
 
 import io.minio.*;
 import io.minio.errors.*;
+import io.minio.messages.DeleteError;
+import io.minio.messages.DeleteObject;
+import io.minio.messages.Item;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -27,25 +30,6 @@ public class FileService {
         this.minioClient = minioClient;
     }
 
-    //    public void uploadFile(String fileName, InputStream fileContent) throws Exception {
-//        ObjectWriteResponse objectWriteResponse = minioClient.putObject(PutObjectArgs.builder()
-//                .bucket(bucketName)
-//                .object(fileName)
-//                .stream(new FileInputStream("/tmp/" + fileName))
-//                .build());
-//    }
-//
-//    public InputStream downloadFile(String fileName) throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
-//        GetObjectArgs getObjectArgs = GetObjectArgs.builder()
-//                .bucket(bucketName)
-//                .object(fileName)
-//                .build();
-//
-//        return minioClient.getObject(getObjectArgs);
-//    }
-//
-
-//commit
 
     public void createBucket(String userInput, String email) throws NoSuchAlgorithmException, InvalidKeyException {
         if (!doesBucketExist(userInput)) {
@@ -126,5 +110,58 @@ public class FileService {
             throw new RuntimeException("Error: " + e.getMessage());
         }
     }
+
+    public void addFile(String bucketName, String fileName, InputStream inputStream, String contentType) throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
+        minioClient.putObject(PutObjectArgs.builder()
+                .bucket(bucketName)
+                .object(fileName)
+                .contentType(contentType)
+                .stream(inputStream, -1, 10485760)
+                .build());
+    }
+
+    public List<String> allObjectsOnBucket(String bucketName) throws Exception{
+        Iterable<Result<Item>> result =  minioClient.listObjects(ListObjectsArgs.builder()
+                .bucket(bucketName)
+                .build());
+        List<String> objects = new ArrayList<>();
+        for(Result<Item>  itemResult : result){
+            try{
+                Item item = itemResult.get();
+                String fileName = item.objectName();
+                objects.add(fileName);
+            }catch (Exception e){
+                throw new Exception("error " + e.getMessage());
+            }
+        }
+        return objects;
+    }
+
+    public void deleteBucket(String bucketName) throws Exception {
+        List<String> objects = allObjectsOnBucket(bucketName);
+
+        Iterable<DeleteObject> objectsToDelete = objects.stream()
+                .map(DeleteObject::new)
+                .collect(Collectors.toList());
+
+        Iterable<Result<DeleteError>> results =
+                minioClient.removeObjects(
+                        RemoveObjectsArgs.builder()
+                                .bucket(bucketName)
+                                .objects(objectsToDelete)
+                                .build());
+
+        for (Result<DeleteError> result : results) {
+            DeleteError error = result.get();
+        }
+
+        minioClient.removeBucket(RemoveBucketArgs.builder()
+                .bucket(bucketName)
+                .build());
+    }
+
+//    public void changeBucketName(String bucketName){
+//        minioClient.
+//    }
 
 }

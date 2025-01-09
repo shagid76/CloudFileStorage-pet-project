@@ -1,14 +1,22 @@
 package us.yarik.CloudFileStorage.controller;
 
+import io.minio.errors.*;
+import io.minio.messages.Item;
+import okhttp3.MultipartBody;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import us.yarik.CloudFileStorage.model.User;
 import us.yarik.CloudFileStorage.service.FileService;
 import us.yarik.CloudFileStorage.service.UserService;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.Optional;
 import java.util.List;
 
@@ -72,12 +80,11 @@ public class DirectoryController {
 
     @GetMapping("/bucket/{email}/{bucketName}")
     public String bucketGet(@PathVariable("email") String email,@PathVariable("bucketName") String bucketName,
-                            Model model){
-        //find all objects
+                            Model model) throws  Exception{
+        List<String> objects = fileService.allObjectsOnBucket(bucketName);
         Optional<User> user = userService.findByEmail(email);
         if (user.isPresent()) {
-            //model.addAttribute("objects", objects);
-
+            model.addAttribute("objects", objects);
             model.addAttribute("user", user.get());
             model.addAttribute("bucketName", bucketName);
             return "bucket";
@@ -85,5 +92,36 @@ public class DirectoryController {
         return "redirect:/directory/" + email;
 
     }
+
+
+    @GetMapping("/add-file/{email}/{bucketName}")
+    public String addFileGet(@PathVariable("email") String email, @PathVariable("bucketName") String bucketName,
+                             Model model){
+        model.addAttribute("user", userService.findByEmail(email).get());
+        model.addAttribute("bucketName", bucketName);
+        return "add-file";
+    }
+    @PostMapping("/add-file/{email}/{bucketName}")
+    public String addFilePost(@PathVariable("email") String email, @PathVariable("bucketName") String bucketName,
+                              @RequestParam("file") MultipartFile file , Model model) throws Exception {
+       try {
+           String fileName = file.getOriginalFilename();
+           InputStream inputStream = file.getInputStream();
+           String contentType = file.getContentType();
+           fileService.addFile(bucketName, fileName, inputStream, contentType);
+           return "redirect:/bucket/" + email +"/" + bucketName;
+       }catch (Exception e){
+           throw new Exception();
+       }
+    }
+
+    @DeleteMapping("/delete/{email}/{bucketName}")
+    public String deleteBucket(@PathVariable("email") String email, @PathVariable("bucketName") String bucketName)
+            throws Exception {
+        fileService.deleteBucket(bucketName);
+        return "redirect:/directory/" + email;
+    }
+
+
 
 }
