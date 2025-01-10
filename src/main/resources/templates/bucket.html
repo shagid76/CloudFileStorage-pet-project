@@ -14,8 +14,9 @@
                     <h3 class="text-center">Objects</h3>
                     <div th:if="${objects != null}">
                         <ul class="list-group">
-                            <li th:each="object : ${objects}" class="list-group-item">
-                                <span th:text="${object}"></span>
+                            <li th:each="fileName : ${objects}" class="list-group-item">
+                                <a th:href="@{/file/{email}/{bucketName}/{fileName}(email = ${user.email}, bucketName = ${bucketName}, fileName = ${fileName})}"><span
+                                        th:text="${fileName}"></span></a>
                             </li>
                         </ul>
                     </div>
@@ -33,7 +34,7 @@
         <div class="row justify-content-center mt-5">
             <div class="col-md-5">
                 <div class="card p-5">
-                    <form  method="post"
+                    <form method="post"
                           th:action="@{/update/{email}/{bucketName}(email = ${user.email}, bucketName = ${bucketName})}">
                         <label for="newBucketName">Change name:</label>
                         <input type="text" id="newBucketName" name="newBucketName">
