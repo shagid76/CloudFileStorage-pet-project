@@ -7,6 +7,10 @@ import io.minio.messages.DeleteObject;
 import io.minio.messages.Item;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -81,33 +85,39 @@ public class FileService {
     }
 
 
-    public String uploudFile(String email, String fileName, String contentType, InputStream fileInputStream, long size) {
-        try {
-            String objectName = email + "/" + fileName;
-            minioClient.putObject(
-                    PutObjectArgs.builder()
-                            .bucket(bucketName)
-                            .object(objectName)
-                            .stream(fileInputStream, size, -1)
-                            .contentType(contentType)
-                            .build()
+    public ResponseEntity<InputStreamResource> downloadFile(String email, String bucketName, String fileName) throws IOException {
+        // Замените этот метод на ваш существующий метод для скачивания файла из MinIO
+        InputStream fileStream = downloadFileFromMinIO(bucketName, fileName);  // Загрузка из MinIO
 
-            );
-            return "File uploaded successfully " + objectName;
-        } catch (Exception e) {
-            throw new RuntimeException("Error: " + e.getMessage());
-        }
+        // Устанавливаем тип контента и другие заголовки
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName);
+        headers.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_OCTET_STREAM_VALUE);
+
+        InputStreamResource resource = new InputStreamResource(fileStream);
+        return ResponseEntity.ok()
+                .headers(headers)
+                .contentLength(fileStream.available())
+                .body(resource);
     }
 
-    public InputStream downloadFile(String email, String fileName) {
+    public InputStream downloadFileFromMinIO(String bucketName, String fileName) throws IOException {
         try {
-            String objectPath = email + "/" + fileName;
+
+            String objectPath = bucketName + "/" + fileName;
+
+
             return minioClient.getObject(GetObjectArgs.builder()
                     .bucket(bucketName)
-                    .object(objectPath)
+                    .object(fileName)
                     .build());
-        } catch (Exception e) {
-            throw new RuntimeException("Error: " + e.getMessage());
+        } catch (MinioException | IOException e) {
+            System.err.println("Ошибка при скачивании файла из MinIO: " + e.getMessage());
+            throw new RuntimeException("Ошибка при скачивании файла из MinIO: " + e.getMessage(), e);
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        } catch (InvalidKeyException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -167,11 +177,11 @@ public class FileService {
                     .bucket(oldBucketName)
                     .object(objectName)
                     .build());
-                minioClient.putObject(PutObjectArgs.builder()
-                        .bucket(newBucketName)
-                        .object(objectName)
-                        .stream(inputStream, -1, 10485760)
-                        .build());
+            minioClient.putObject(PutObjectArgs.builder()
+                    .bucket(newBucketName)
+                    .object(objectName)
+                    .stream(inputStream, -1, 10485760)
+                    .build());
 
             minioClient.removeObject(RemoveObjectArgs.builder()
                     .bucket(oldBucketName)
@@ -180,5 +190,47 @@ public class FileService {
         }
         deleteBucket(oldBucketName);
     }
+
+    public String findFileByName(String bucketName, String fileName) throws Exception {
+        List<String> objects = allObjectsOnBucket(bucketName);
+        return objects.stream()
+                .filter(obj -> obj.equals(fileName)).toString()
+                ;
+    }
+
+    public void deleteFile(String bucketName, String fileName) throws ServerException,
+            InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException,
+            InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
+        minioClient.removeObject(RemoveObjectArgs.builder()
+                .bucket(bucketName)
+                .object(fileName).build());
+    }
+
+    public void renameFile(String bucketName, String fileName, String newFileName) throws IOException {
+        try {
+
+            CopySource copySource = CopySource.builder()
+                    .bucket(bucketName)
+                    .object(fileName)
+                    .build();
+
+            minioClient.copyObject(
+                    CopyObjectArgs.builder()
+                            .bucket(bucketName)
+                            .object(newFileName)
+                            .source(copySource)
+                            .build()
+            );
+
+            deleteFile(bucketName, fileName);
+        } catch (MinioException | IOException e) {
+            throw new IOException("Error renaming file in MinIO", e);
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        } catch (InvalidKeyException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 
 }
