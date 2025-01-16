@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-public class FileService {
+public class MinioService {
 
     private final MinioClient minioClient;
 
@@ -30,7 +30,7 @@ public class FileService {
     private String bucketName;
 
     @Autowired
-    public FileService(MinioClient minioClient) {
+    public MinioService(MinioClient minioClient) {
         this.minioClient = minioClient;
     }
 
@@ -86,10 +86,8 @@ public class FileService {
 
 
     public ResponseEntity<InputStreamResource> downloadFile(String email, String bucketName, String fileName) throws IOException {
-        // Замените этот метод на ваш существующий метод для скачивания файла из MinIO
-        InputStream fileStream = downloadFileFromMinIO(bucketName, fileName);  // Загрузка из MinIO
+        InputStream fileStream = downloadFileFromMinIO(bucketName, fileName);
 
-        // Устанавливаем тип контента и другие заголовки
         HttpHeaders headers = new HttpHeaders();
         headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName);
         headers.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_OCTET_STREAM_VALUE);
