@@ -49,7 +49,11 @@
         <div class="row justify-content-center mt-4">
             <div class="col-md-4">
                 <div class="card p-4">
-                    <a th:href="@{/download/{email}/{bucketName}/{fileName}(email=${email},bucketName=${bucketName}, fileName=${fileName})}" class="btn btn-primary">Download File</a>
+                    <form method="post"
+                          th:action="@{/delete/{email}/{bucketName}/{fileName}(email=${email}, bucketName=${bucketName}, fileName=${fileName})}">
+                        <input type="hidden" name="_method" value="delete">
+                        <button class="btn btn-danger w-100" type="submit">Delete file</button>
+                    </form>
                 </div>
             </div>
         </div>

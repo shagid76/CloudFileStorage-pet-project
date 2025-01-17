@@ -1,7 +1,7 @@
 package us.yarik.CloudFileStorage.controller;
 
 import io.minio.errors.*;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -9,28 +9,30 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import us.yarik.CloudFileStorage.model.File;
 import us.yarik.CloudFileStorage.model.User;
 import us.yarik.CloudFileStorage.service.FileService;
+import us.yarik.CloudFileStorage.service.MinioService;
 import us.yarik.CloudFileStorage.service.UserService;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 @Controller
+@AllArgsConstructor
 public class DirectoryController {
     private final UserService userService;
-
+    private final MinioService minioService;
     private final FileService fileService;
 
-    @Autowired
-    public DirectoryController(UserService userService, FileService fileService) {
-        this.fileService = fileService;
-        this.userService = userService;
-    }
 
     @GetMapping("/redirect_to_directory")
     public String redirectToBalance(Authentication authentication) {
@@ -41,7 +43,7 @@ public class DirectoryController {
 
     @GetMapping("/directory/{email}")
     public String viewUserBuckets(@PathVariable("email") String email, Model model) {
-        List<String> buckets = fileService.getBucketsForUser(email);
+        List<String> buckets = minioService.getBucketsForUser(email);
         Optional<User> user = userService.findByEmail(email);
         if (user.isPresent()) {
             model.addAttribute("buckets", buckets);
@@ -65,7 +67,7 @@ public class DirectoryController {
     public String createUserStorage(@PathVariable("email") String email, @ModelAttribute("bucketName") String bucketName,
                                     Model model) {
         try {
-            fileService.createBucket(bucketName, email);
+            minioService.createBucket(bucketName, email);
             return "redirect:/directory/" + email;
         } catch (Exception e) {
             Optional<User> user = userService.findByEmail(email);
@@ -81,7 +83,7 @@ public class DirectoryController {
     @GetMapping("/bucket/{email}/{bucketName}")
     public String bucketGet(@PathVariable("email") String email, @PathVariable("bucketName") String bucketName,
                             Model model) throws Exception {
-        List<String> objects = fileService.allObjectsOnBucket(bucketName);
+        List<String> objects = minioService.allObjectsOnBucket(bucketName);
         Optional<User> user = userService.findByEmail(email);
         if (user.isPresent()) {
             model.addAttribute("objects", objects);
@@ -105,22 +107,39 @@ public class DirectoryController {
 
     @PostMapping("/add-file/{email}/{bucketName}")
     public String addFilePost(@PathVariable("email") String email, @PathVariable("bucketName") String bucketName,
-                              @RequestParam("file") MultipartFile file, Model model) throws Exception {
+                              @RequestParam("file") MultipartFile file) throws Exception {
         try {
             String fileName = file.getOriginalFilename();
+            String sanitizedFileName = fileName.replaceAll("[<>:\"/\\|?*]", "_");
             InputStream inputStream = file.getInputStream();
             String contentType = file.getContentType();
-            fileService.addFile(bucketName, fileName, inputStream, contentType);
+            Path path = Paths.get(email.substring(0, email.indexOf("@")) + java.io.File.separator + bucketName + java.io.File.separator + sanitizedFileName);
+            java.io.File directory = path.getParent().toFile();
+            if (!directory.exists()) {
+                directory.mkdirs();
+            }
+            Files.write(path, file.getBytes());
+            File uploadFile = new File();
+            uploadFile.setFileName(file.getOriginalFilename());
+            uploadFile.setFileSize(file.getSize());
+            uploadFile.setFileType(file.getContentType());
+            uploadFile.setUploadDate(LocalDateTime.now());
+            uploadFile.setMinioPath(path.toString());
+            uploadFile.setOwner(email.substring(0, email.indexOf("@")));
+            fileService.uploadFile(uploadFile);
+            minioService.addFile(bucketName, fileName, inputStream, contentType);
+
             return "redirect:/bucket/" + email + "/" + bucketName;
         } catch (Exception e) {
-            throw new Exception();
+
+            throw new Exception("Error occurred while adding file: " + e.getMessage());
         }
     }
 
     @DeleteMapping("/delete/{email}/{bucketName}")
     public String deleteBucket(@PathVariable("email") String email, @PathVariable("bucketName") String bucketName)
             throws Exception {
-        fileService.deleteBucket(bucketName);
+        minioService.deleteBucket(bucketName);
         return "redirect:/directory/" + email;
     }
 
@@ -128,9 +147,9 @@ public class DirectoryController {
     public String updateBucket(@PathVariable("email") String email, @PathVariable("bucketName") String oldBucketName,
                                @ModelAttribute("newBucketName") String newBucketName) throws Exception {
         System.out.println(email + " " + oldBucketName + " " + newBucketName);
-        fileService.createBucket(newBucketName, email);
+        minioService.createBucket(newBucketName, email);
 
-        fileService.changeBucketName(oldBucketName, newBucketName);
+        minioService.changeBucketName(oldBucketName, newBucketName);
         return "redirect:/directory/" + email;
     }
 
@@ -148,7 +167,7 @@ public class DirectoryController {
                              @PathVariable("fileName") String fileName) throws ServerException,
             InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException,
             InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
-        fileService.deleteFile(bucketName, fileName);
+        minioService.deleteFile(bucketName, fileName);
         return "redirect:/bucket/" + email + "/" + bucketName;
     }
 
@@ -156,7 +175,7 @@ public class DirectoryController {
     public String renameFile(@PathVariable("email") String email, @PathVariable("bucketName") String bucketName,
                              @PathVariable("fileName") String fileName,
                              @RequestParam("newFileName") String newFileName) throws IOException {
-        fileService.renameFile(bucketName, fileName, newFileName);
+        minioService.renameFile(bucketName, fileName, newFileName);
         return "redirect:/bucket/" + email + "/" + bucketName;
     }
 
@@ -164,7 +183,7 @@ public class DirectoryController {
     public ResponseEntity<InputStreamResource> downloadFile(@PathVariable String email,
                                                             @PathVariable String bucketName,
                                                             @PathVariable String fileName) throws IOException {
-        return fileService.downloadFile(email, bucketName, fileName);
+        return minioService.downloadFile(email, bucketName, fileName);
     }
 
 
