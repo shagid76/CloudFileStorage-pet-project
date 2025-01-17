@@ -1,7 +1,7 @@
 package us.yarik.CloudFileStorage.controller;
 
 import io.minio.errors.*;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -9,28 +9,30 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import us.yarik.CloudFileStorage.model.File;
 import us.yarik.CloudFileStorage.model.User;
+import us.yarik.CloudFileStorage.service.FileService;
 import us.yarik.CloudFileStorage.service.MinioService;
 import us.yarik.CloudFileStorage.service.UserService;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 @Controller
+@AllArgsConstructor
 public class DirectoryController {
     private final UserService userService;
-
     private final MinioService minioService;
+    private final FileService fileService;
 
-    @Autowired
-    public DirectoryController(UserService userService, MinioService minioService) {
-        this.minioService = minioService;
-        this.userService = userService;
-    }
 
     @GetMapping("/redirect_to_directory")
     public String redirectToBalance(Authentication authentication) {
@@ -105,15 +107,32 @@ public class DirectoryController {
 
     @PostMapping("/add-file/{email}/{bucketName}")
     public String addFilePost(@PathVariable("email") String email, @PathVariable("bucketName") String bucketName,
-                              @RequestParam("file") MultipartFile file, Model model) throws Exception {
+                              @RequestParam("file") MultipartFile file) throws Exception {
         try {
             String fileName = file.getOriginalFilename();
+            String sanitizedFileName = fileName.replaceAll("[<>:\"/\\|?*]", "_");
             InputStream inputStream = file.getInputStream();
             String contentType = file.getContentType();
+            Path path = Paths.get(email.substring(0, email.indexOf("@")) + java.io.File.separator + bucketName + java.io.File.separator + sanitizedFileName);
+            java.io.File directory = path.getParent().toFile();
+            if (!directory.exists()) {
+                directory.mkdirs();
+            }
+            Files.write(path, file.getBytes());
+            File uploadFile = new File();
+            uploadFile.setFileName(file.getOriginalFilename());
+            uploadFile.setFileSize(file.getSize());
+            uploadFile.setFileType(file.getContentType());
+            uploadFile.setUploadDate(LocalDateTime.now());
+            uploadFile.setMinioPath(path.toString());
+            uploadFile.setOwner(email.substring(0, email.indexOf("@")));
+            fileService.uploadFile(uploadFile);
             minioService.addFile(bucketName, fileName, inputStream, contentType);
+
             return "redirect:/bucket/" + email + "/" + bucketName;
         } catch (Exception e) {
-            throw new Exception();
+
+            throw new Exception("Error occurred while adding file: " + e.getMessage());
         }
     }
 
