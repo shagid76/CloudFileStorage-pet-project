@@ -82,11 +82,11 @@ public class DirectoryController {
 
     @GetMapping("/bucket/{email}/{bucketName}")
     public String bucketGet(@PathVariable("email") String email, @PathVariable("bucketName") String bucketName,
-                            Model model) throws Exception {
-        List<String> objects = minioService.allObjectsOnBucket(bucketName);
+                            Model model){
+        List<File> files = fileService.findByOwner(email.substring(0, email.indexOf("@")));
         Optional<User> user = userService.findByEmail(email);
         if (user.isPresent()) {
-            model.addAttribute("objects", objects);
+            model.addAttribute("files", files);
             model.addAttribute("user", user.get());
             model.addAttribute("bucketName", bucketName);
             model.addAttribute("newBucketName", new String());
@@ -168,6 +168,8 @@ public class DirectoryController {
             InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException,
             InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
         minioService.deleteFile(bucketName, fileName);
+        File file = fileService.findByOwnerAndFileName(email.substring(0, email.indexOf("@")), fileName);
+        fileService.deleteFile(file);
         return "redirect:/bucket/" + email + "/" + bucketName;
     }
 
@@ -175,7 +177,7 @@ public class DirectoryController {
     public String renameFile(@PathVariable("email") String email, @PathVariable("bucketName") String bucketName,
                              @PathVariable("fileName") String fileName,
                              @RequestParam("newFileName") String newFileName) throws IOException {
-        minioService.renameFile(bucketName, fileName, newFileName);
+        fileService.updateFileName(fileService.findByOwnerAndFileName(email.substring(0, email.indexOf("@")), fileName),newFileName);
         return "redirect:/bucket/" + email + "/" + bucketName;
     }
 
