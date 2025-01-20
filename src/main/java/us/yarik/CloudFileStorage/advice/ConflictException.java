@@ -1,4 +1,4 @@
-package us.yarik.CloudFileStorage.exception;
+package us.yarik.CloudFileStorage.advice;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;

@@ -192,8 +192,7 @@ public class MinioService {
     public String findFileByName(String bucketName, String fileName) throws Exception {
         List<String> objects = allObjectsOnBucket(bucketName);
         return objects.stream()
-                .filter(obj -> obj.equals(fileName)).toString()
-                ;
+                .filter(obj -> obj.equals(fileName)).toString();
     }
 
     public void deleteFile(String bucketName, String fileName) throws ServerException,

@@ -1,10 +1,9 @@
-package us.yarik.CloudFileStorage.controller;
+package us.yarik.CloudFileStorage.advice;
 
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import us.yarik.CloudFileStorage.exception.ConflictException;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
