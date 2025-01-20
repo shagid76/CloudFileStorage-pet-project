@@ -1,0 +1,31 @@
+version: '3.9'
+
+services:
+  minio:
+    image: minio/minio
+    ports:
+      - "9000:9000"
+    environment:
+      MINIO_ROOT_USER: "CU1Zr03M0sPPL1qTQxhM"
+      MINIO_ROOT_PASSWORD: "fa1uMWQ1QRPnN7Cb36npHMjWO8ReewSG560PTuTz"
+
+    command: server /data
+    volumes:
+      - ./data:/data
+    networks:
+      - my_network
+
+
+  mongo:
+    image: mongo:6-jammy
+    ports:
+      - "27017:27017"
+    networks:
+      - my_network
+networks:
+  my_network:
+    driver: bridge
+
+
+
+
