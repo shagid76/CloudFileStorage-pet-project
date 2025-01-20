@@ -11,14 +11,14 @@
         <div class="row justify-content-center mt-4">
             <div class="col-md-6">
                 <div class="card p-4">
-                    <h2 class="text-center">Создать бакет</h2>
+                    <h2 class="text-center">Create bucket</h2>
                     <form th:action="@{/create/{email}(email = ${user.email})}" method="post" class="mt-4">
                         <input type="hidden" name="_csrf" th:value="${_csrf.token}">
                         <div class="mb-3">
-                            <label for="bucketName" class="form-label">Название бакета</label>
-                            <input type="text" id="bucketName" name="bucketName" class="form-control" placeholder="Введите название бакета" required>
+                            <label for="bucketName" class="form-label">Name</label>
+                            <input type="text" id="bucketName" name="bucketName" class="form-control" placeholder="Enter bucket name" required>
                         </div>
-                        <button type="submit" class="btn btn-primary w-100">Создать</button>
+                        <button type="submit" class="btn btn-primary w-100">Create</button>
                         <div class="alert alert-danger" role="alert" th:if="${error}">
                             <p>Bucket already exist.</p>
                         </div>
