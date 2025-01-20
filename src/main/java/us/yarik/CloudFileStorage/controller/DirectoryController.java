@@ -82,11 +82,11 @@ public class DirectoryController {
 
     @GetMapping("/bucket/{email}/{bucketName}")
     public String bucketGet(@PathVariable("email") String email, @PathVariable("bucketName") String bucketName,
-                            Model model) throws Exception {
-        List<String> objects = minioService.allObjectsOnBucket(bucketName);
+                            Model model) {
+        List<File> files = fileService.findByBucket(bucketName);
         Optional<User> user = userService.findByEmail(email);
         if (user.isPresent()) {
-            model.addAttribute("objects", objects);
+            model.addAttribute("files", files);
             model.addAttribute("user", user.get());
             model.addAttribute("bucketName", bucketName);
             model.addAttribute("newBucketName", new String());
@@ -126,6 +126,7 @@ public class DirectoryController {
             uploadFile.setUploadDate(LocalDateTime.now());
             uploadFile.setMinioPath(path.toString());
             uploadFile.setOwner(email.substring(0, email.indexOf("@")));
+            uploadFile.setBucket(bucketName);
             fileService.uploadFile(uploadFile);
             minioService.addFile(bucketName, fileName, inputStream, contentType);
 
@@ -155,10 +156,11 @@ public class DirectoryController {
 
     @GetMapping("/file/{email}/{bucketName}/{fileName}")
     public String filePage(@PathVariable("email") String email, @PathVariable("bucketName") String bucketName,
-                           @PathVariable("fileName") String fileName, Model model) throws Exception {
+                           @PathVariable("fileName") String fileName, Model model){
         model.addAttribute("email", email);
         model.addAttribute("bucketName", bucketName);
-        model.addAttribute("fileName", fileName);
+        model.addAttribute("file", fileService.findByOwnerAndFileName(
+                email.substring(0, email.indexOf("@")), fileName));
         return "file";
     }
 
@@ -168,6 +170,8 @@ public class DirectoryController {
             InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException,
             InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
         minioService.deleteFile(bucketName, fileName);
+        File file = fileService.findByOwnerAndFileName(email.substring(0, email.indexOf("@")), fileName);
+        fileService.deleteFile(file);
         return "redirect:/bucket/" + email + "/" + bucketName;
     }
 
@@ -175,7 +179,7 @@ public class DirectoryController {
     public String renameFile(@PathVariable("email") String email, @PathVariable("bucketName") String bucketName,
                              @PathVariable("fileName") String fileName,
                              @RequestParam("newFileName") String newFileName) throws IOException {
-        minioService.renameFile(bucketName, fileName, newFileName);
+        fileService.updateFileName(fileService.findByOwnerAndFileName(email.substring(0, email.indexOf("@")), fileName), newFileName);
         return "redirect:/bucket/" + email + "/" + bucketName;
     }
 
