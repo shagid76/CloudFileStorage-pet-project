@@ -13,28 +13,35 @@ import java.util.Optional;
 public class FileService {
     private final FileRepository fileRepository;
 
-    public List<File> findAll(){
+    public List<File> findAll() {
         return fileRepository.findAll();
     }
-    public File uploadFile(File file){
+
+    public File uploadFile(File file) {
         return fileRepository.save(file);
     }
-    public List<File> findByOwner(String owner){
+
+    public List<File> findByOwner(String owner) {
         return fileRepository.findByOwner(owner);
     }
-    public void deleteFile(File file){
+
+    public void deleteFile(File file) {
         fileRepository.delete(file);
     }
-    public File findByOwnerAndFileName(String owner, String fileName){
+
+    public File findByOwnerAndFileName(String owner, String fileName) {
         Optional<File> file = fileRepository.findByOwnerAndFileName(owner, fileName);
-        if (file.isPresent()){
+        if (file.isPresent()) {
             return file.get();
         }
         return file.orElse(null);
     }
 
-    public void updateFileName(File file, String fileName){
+    public void updateFileName(File file, String fileName) {
         file.setFileName(fileName);
         fileRepository.save(file);
+    }
+    public List<File> findByBucket(String bucket){
+        return fileRepository.findByBucket(bucket);
     }
 }

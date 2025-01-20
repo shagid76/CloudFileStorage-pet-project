@@ -24,6 +24,7 @@ public class File {
     private LocalDateTime uploadDate;
     private String minioPath;
     private String owner;
+    private String bucket;
 
 
 }
