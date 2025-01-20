@@ -11,9 +11,14 @@
         <div class="row justify-content-center mt-4">
             <div class="col-md-8">
                 <div class="card p-4">
-                    <h1 class="text-center">File</h1>
+                    <h1 class="text-center">File information</h1>
                     <div>
-                        <p class="text-center" th:text="${fileName}"></p>
+                        <hr>
+                        <p class="text-center" th:text="${'Title: ' + file.fileName}"></p>
+                        <p class="text-center" th:text="${'Size: ' + file.fileSize + 'KB'}"></p>
+                        <p class="text-center" th:text="${'Type: ' + file.fileType}"></p>
+                        <p class="text-center" th:text="${'Upload date: ' + #temporals.format(file.uploadDate, 'yyyy/MM/dd HH:mm')}"></p>
+                        <p class="text-center" th:text="${'Owner: ' + file.owner}"></p>
                     </div>
                 </div>
             </div>

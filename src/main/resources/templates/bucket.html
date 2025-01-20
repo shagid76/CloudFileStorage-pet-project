@@ -17,6 +17,7 @@
                             <li th:each="fileName : ${files}" class="list-group-item">
                                 <a th:href="@{/file/{email}/{bucketName}/{fileName}(email = ${user.email}, bucketName = ${bucketName}, fileName = ${fileName.fileName})}"><span
                                         th:text="${fileName.fileName}"></span></a>
+                                <span class="float-end" th:text="${#temporals.format(fileName.uploadDate, 'yyyy/MM/dd HH:mm')}"></span>
                             </li>
                         </ul>
                     </div>
