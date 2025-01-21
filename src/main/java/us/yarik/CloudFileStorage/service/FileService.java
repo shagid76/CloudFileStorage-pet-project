@@ -41,7 +41,7 @@ public class FileService {
         file.setFileName(fileName);
         fileRepository.save(file);
     }
-    public List<File> findByBucket(String bucket){
-        return fileRepository.findByBucket(bucket);
+    public void deleteFilesByOwner(String owner){
+        fileRepository.deleteByOwner(owner);
     }
 }

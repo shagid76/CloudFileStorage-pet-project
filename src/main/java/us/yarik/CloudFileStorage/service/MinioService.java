@@ -5,6 +5,7 @@ import io.minio.errors.*;
 import io.minio.messages.DeleteError;
 import io.minio.messages.DeleteObject;
 import io.minio.messages.Item;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.InputStreamResource;
@@ -21,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+//TODO make download method
 @Service
 public class MinioService {
 
@@ -29,63 +31,61 @@ public class MinioService {
     @Value("${minio.bucketName}")
     private String bucketName;
 
-    @Autowired
     public MinioService(MinioClient minioClient) {
         this.minioClient = minioClient;
     }
 
+//    public void createBucket(String userInput, String email) throws NoSuchAlgorithmException, InvalidKeyException {
+//        if (!doesBucketExist(userInput)) {
+//            try {
+//                String userBucketName = email.substring(0, email.indexOf("@")) + "-" + userInput;
+//
+//                minioClient.makeBucket(MakeBucketArgs.builder()
+//                        .bucket(userBucketName)
+//                        .build());
+//
+//            } catch (ErrorResponseException e) {
+//                throw new RuntimeException(e);
+//            } catch (InsufficientDataException e) {
+//                throw new RuntimeException(e);
+//            } catch (InternalException e) {
+//                throw new RuntimeException(e);
+//            } catch (InvalidResponseException e) {
+//                throw new RuntimeException(e);
+//            } catch (IOException e) {
+//                throw new RuntimeException(e);
+//            } catch (ServerException e) {
+//                throw new RuntimeException(e);
+//            } catch (XmlParserException e) {
+//                throw new RuntimeException(e);
+//            }
+//        }
+//    }
 
-    public void createBucket(String userInput, String email) throws NoSuchAlgorithmException, InvalidKeyException {
-        if (!doesBucketExist(userInput)) {
-            try {
-                String userBucketName = email.substring(0, email.indexOf("@")) + "-" + userInput;
+//    public List<String> getBucketsForUser(String email) {
+//        try {
+//            List<String> bucketNames = new ArrayList<>();
+//            minioClient.listBuckets().forEach(bucket -> bucketNames.add(bucket.name()));
+//
+//            return bucketNames.stream()
+//                    .filter(bucketName -> bucketName.contains(email.substring(0, email.indexOf("@"))))
+//                    .collect(Collectors.toList());
+//        } catch (Exception e) {
+//            throw new RuntimeException("Error retrieving buckets: " + e.getMessage(), e);
+//        }
+//    }
 
-                minioClient.makeBucket(MakeBucketArgs.builder()
-                        .bucket(userBucketName)
-                        .build());
-
-            } catch (ErrorResponseException e) {
-                throw new RuntimeException(e);
-            } catch (InsufficientDataException e) {
-                throw new RuntimeException(e);
-            } catch (InternalException e) {
-                throw new RuntimeException(e);
-            } catch (InvalidResponseException e) {
-                throw new RuntimeException(e);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            } catch (ServerException e) {
-                throw new RuntimeException(e);
-            } catch (XmlParserException e) {
-                throw new RuntimeException(e);
-            }
-        }
-    }
-
-    public List<String> getBucketsForUser(String email) {
-        try {
-            List<String> bucketNames = new ArrayList<>();
-            minioClient.listBuckets().forEach(bucket -> bucketNames.add(bucket.name()));
-
-            return bucketNames.stream()
-                    .filter(bucketName -> bucketName.contains(email.substring(0, email.indexOf("@"))))
-                    .collect(Collectors.toList());
-        } catch (Exception e) {
-            throw new RuntimeException("Error retrieving buckets: " + e.getMessage(), e);
-        }
-    }
-
-    public boolean doesBucketExist(String bucketName) {
-        try {
-            return minioClient.listBuckets().stream()
-                    .anyMatch(bucket -> bucket.name().equals(bucketName));
-        } catch (Exception e) {
-            throw new IllegalArgumentException();
-        }
-    }
+//    public boolean doesBucketExist(String bucketName) {
+//        try {
+//            return minioClient.listBuckets().stream()
+//                    .anyMatch(bucket -> bucket.name().equals(bucketName));
+//        } catch (Exception e) {
+//            throw new IllegalArgumentException();
+//        }
+//    }
 
 
-    public ResponseEntity<InputStreamResource> downloadFile(String email, String bucketName, String fileName) throws IOException {
+    public ResponseEntity<InputStreamResource> downloadFile(String email, String fileName) throws IOException {
         InputStream fileStream = downloadFileFromMinIO(bucketName, fileName);
 
         HttpHeaders headers = new HttpHeaders();
@@ -119,16 +119,33 @@ public class MinioService {
         }
     }
 
-    public void addFile(String bucketName, String fileName, InputStream inputStream, String contentType) throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
+    public void addFile(String owner,String fileName, InputStream inputStream, String contentType) throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
         minioClient.putObject(PutObjectArgs.builder()
                 .bucket(bucketName)
-                .object(fileName)
+                .object(owner+ "-" + fileName)
                 .contentType(contentType)
                 .stream(inputStream, -1, 10485760)
                 .build());
     }
 
-    public List<String> allObjectsOnBucket(String bucketName) throws Exception {
+//    public List<String> allObjectsOnBucket(String bucketName) throws Exception {
+//        Iterable<Result<Item>> result = minioClient.listObjects(ListObjectsArgs.builder()
+//                .bucket(bucketName)
+//                .build());
+//        List<String> objects = new ArrayList<>();
+//        for (Result<Item> itemResult : result) {
+//            try {
+//                Item item = itemResult.get();
+//                String fileName = item.objectName();
+//                objects.add(fileName);
+//            } catch (Exception e) {
+//                throw new Exception("error " + e.getMessage());
+//            }
+//        }
+//        return objects;
+//    }
+
+    public List<String> allObjectsByOwner(String owner) throws Exception{
         Iterable<Result<Item>> result = minioClient.listObjects(ListObjectsArgs.builder()
                 .bucket(bucketName)
                 .build());
@@ -137,16 +154,17 @@ public class MinioService {
             try {
                 Item item = itemResult.get();
                 String fileName = item.objectName();
-                objects.add(fileName);
+                if(fileName.contains(owner)) {
+                    objects.add(fileName);
+                }
             } catch (Exception e) {
                 throw new Exception("error " + e.getMessage());
             }
         }
         return objects;
     }
-
-    public void deleteBucket(String bucketName) throws Exception {
-        List<String> objects = allObjectsOnBucket(bucketName);
+    public void deleteFilesByOwner(String owner) throws Exception {
+        List<String> objects = allObjectsByOwner(owner);
 
         Iterable<DeleteObject> objectsToDelete = objects.stream()
                 .map(DeleteObject::new)
@@ -162,40 +180,36 @@ public class MinioService {
         for (Result<DeleteError> result : results) {
             DeleteError error = result.get();
         }
-
-        minioClient.removeBucket(RemoveBucketArgs.builder()
-                .bucket(bucketName)
-                .build());
     }
 
-    public void changeBucketName(String oldBucketName, String newBucketName) throws Exception {
-        List<String> objects = allObjectsOnBucket(oldBucketName);
-        for (String objectName : objects) {
-            InputStream inputStream = minioClient.getObject(GetObjectArgs.builder()
-                    .bucket(oldBucketName)
-                    .object(objectName)
-                    .build());
-            minioClient.putObject(PutObjectArgs.builder()
-                    .bucket(newBucketName)
-                    .object(objectName)
-                    .stream(inputStream, -1, 10485760)
-                    .build());
+//    public void changeBucketName(String oldBucketName, String newBucketName) throws Exception {
+//        List<String> objects = allObjectsOnBucket(oldBucketName);
+//        for (String objectName : objects) {
+//            InputStream inputStream = minioClient.getObject(GetObjectArgs.builder()
+//                    .bucket(oldBucketName)
+//                    .object(objectName)
+//                    .build());
+//            minioClient.putObject(PutObjectArgs.builder()
+//                    .bucket(newBucketName)
+//                    .object(objectName)
+//                    .stream(inputStream, -1, 10485760)
+//                    .build());
+//
+//            minioClient.removeObject(RemoveObjectArgs.builder()
+//                    .bucket(oldBucketName)
+//                    .object(objectName)
+//                    .build());
+//        }
+//        deleteBucket(oldBucketName);
+//    }
 
-            minioClient.removeObject(RemoveObjectArgs.builder()
-                    .bucket(oldBucketName)
-                    .object(objectName)
-                    .build());
-        }
-        deleteBucket(oldBucketName);
-    }
+//    public String findFileByName(String bucketName, String fileName) throws Exception {
+//        List<String> objects = allObjectsOnBucket(bucketName);
+//        return objects.stream()
+//                .filter(obj -> obj.equals(fileName)).toString();
+//    }
 
-    public String findFileByName(String bucketName, String fileName) throws Exception {
-        List<String> objects = allObjectsOnBucket(bucketName);
-        return objects.stream()
-                .filter(obj -> obj.equals(fileName)).toString();
-    }
-
-    public void deleteFile(String bucketName, String fileName) throws ServerException,
+    public void deleteFile(String fileName) throws ServerException,
             InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException,
             InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
         minioClient.removeObject(RemoveObjectArgs.builder()
@@ -219,7 +233,7 @@ public class MinioService {
                             .build()
             );
 
-            deleteFile(bucketName, fileName);
+            deleteFile(fileName);
         } catch (MinioException | IOException e) {
             throw new IOException("Error renaming file in MinIO", e);
         } catch (NoSuchAlgorithmException e) {

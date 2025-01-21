@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
@@ -15,16 +14,17 @@ import java.time.LocalDateTime;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+//TODO parentFileId it's for folder
 public class File {
     @Id
-    private ObjectId id;
+    private String id;
     private String fileName;
     private Long fileSize;
     private String fileType;
     private LocalDateTime uploadDate;
     private String minioPath;
     private String owner;
-    private String bucket;
+    private String parentFileId;
 
 
 }

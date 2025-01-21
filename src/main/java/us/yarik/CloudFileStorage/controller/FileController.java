@@ -16,6 +16,7 @@ public class FileController {
 
     @GetMapping("/files")
     public List<File> getAllFiles() {
+
         return fileService.findAll();
     }
 
