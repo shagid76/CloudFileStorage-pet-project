@@ -2,11 +2,15 @@ package us.yarik.CloudFileStorage.controller;
 
 import io.minio.errors.*;
 import lombok.AllArgsConstructor;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import us.yarik.CloudFileStorage.model.File;
@@ -102,7 +106,8 @@ public class DirectoryController {
             String sanitizedFileName = fileName.replaceAll("[<>:\"/\\|?*]", "_");
             InputStream inputStream = file.getInputStream();
             String contentType = file.getContentType();
-            Path path = Paths.get(email.substring(0, email.indexOf("@"))  + java.io.File.separator + sanitizedFileName);
+            Path path = Paths.get( "bucket" + java.io.File.separator + email.substring(0, email.indexOf("@")) + "-"+ sanitizedFileName);
+
 
             File uploadFile = new File();
             uploadFile.setFileName(file.getOriginalFilename());
@@ -171,9 +176,12 @@ public class DirectoryController {
 
     //TODO make download method(maybe make logic on frontend)
     @GetMapping("/download/{email}/{fileName}")
-    public ResponseEntity<InputStreamResource> downloadFile(@PathVariable String email,
-                                                            @PathVariable String fileName) throws IOException {
-        return minioService.downloadFile(email, fileName);
+    public ResponseEntity<ByteArrayResource> downloadFile(@PathVariable String email,
+                                                          @PathVariable String fileName){
+        ByteArrayResource file = minioService.downloadFile(email.substring(0, email.indexOf("@")) + "-" + fileName);
+        return ResponseEntity.ok()
+                .header("Content-Disposition", "attachment; filename=" + fileName)
+                .body(file);
     }
 
 

@@ -5,17 +5,23 @@ import io.minio.errors.*;
 import io.minio.messages.DeleteError;
 import io.minio.messages.DeleteObject;
 import io.minio.messages.Item;
+import jakarta.validation.constraints.Min;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -85,39 +91,23 @@ public class MinioService {
 //    }
 
 
-    public ResponseEntity<InputStreamResource> downloadFile(String email, String fileName) throws IOException {
-        InputStream fileStream = downloadFileFromMinIO(bucketName, fileName);
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName);
-        headers.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_OCTET_STREAM_VALUE);
-
-        InputStreamResource resource = new InputStreamResource(fileStream);
-        return ResponseEntity.ok()
-                .headers(headers)
-                .contentLength(fileStream.available())
-                .body(resource);
-    }
-
-    public InputStream downloadFileFromMinIO(String bucketName, String fileName) throws IOException {
-        try {
-
-            String objectPath = bucketName + "/" + fileName;
-
-
-            return minioClient.getObject(GetObjectArgs.builder()
-                    .bucket(bucketName)
-                    .object(fileName)
-                    .build());
-        } catch (MinioException | IOException e) {
-            System.err.println("Ошибка при скачивании файла из MinIO: " + e.getMessage());
-            throw new RuntimeException("Ошибка при скачивании файла из MinIO: " + e.getMessage(), e);
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
-        } catch (InvalidKeyException e) {
-            throw new RuntimeException(e);
+    public ByteArrayResource downloadFile(String fileName) {
+        GetObjectArgs getObjectArgs = GetObjectArgs.builder()
+                .bucket(bucketName)
+                .object(fileName)
+                .build();
+        try (GetObjectResponse object = minioClient.getObject(getObjectArgs)) {
+            return new ByteArrayResource(object.readAllBytes());
+        }
+        catch (Exception e) {
+            System.err.println(e.getMessage());
+            return new ByteArrayResource(new byte[0]);
         }
     }
+
+
+
 
     public void addFile(String owner,String fileName, InputStream inputStream, String contentType) throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
         minioClient.putObject(PutObjectArgs.builder()
