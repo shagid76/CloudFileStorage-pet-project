@@ -29,7 +29,7 @@
             <div class="col-md-5">
                 <div class="card p-5">
                     <form method="post"
-                          th:action="@{/update/{email}/{bucketName}/{fileName}(email = ${email}, bucketName = ${bucketName}, fileName = ${fileName})}">
+                          th:action="@{/update/{email}/{fileName}(email = ${email},  fileName = ${fileName})}">
                         <label for="newFileName">Change name:</label>
                         <input type="text" id="newFileName" name="newFileName">
                         <button class="btn btn-primary" type="submit">Submit</button>
@@ -42,7 +42,7 @@
                 <div class="card p-4">
                     <h3 class="text-center">Download File</h3>
                     <div class="text-center">
-                        <form method="get" th:action="@{/download/{email}/{bucketName}/{fileName}(email=${email}, bucketName=${bucketName}, fileName=${fileName})}">
+                        <form method="get" th:action="@{/download/{email}/{fileName}(email=${email}, fileName=${fileName})}">
                             <button class="btn btn-primary" type="submit">Download File</button>
                         </form>
                     </div>
@@ -55,7 +55,7 @@
             <div class="col-md-4">
                 <div class="card p-4">
                     <form method="post"
-                          th:action="@{/delete/{email}/{bucketName}/{fileName}(email=${email}, bucketName=${bucketName}, fileName=${fileName})}">
+                          th:action="@{/delete/{email}/{fileName}(email=${email}, fileName=${fileName})}">
                         <input type="hidden" name="_method" value="delete">
                         <button class="btn btn-danger w-100" type="submit">Delete file</button>
                     </form>
@@ -68,8 +68,8 @@
             <div class="col-md-4">
                 <div class="card p-4">
                     <a class="btn btn-primary"
-                       th:href="@{/bucket/{email}/{bucketName}(email = ${email}, bucketName = ${bucketName})}">Back to
-                        bucket</a>
+                       th:href="@{/directory/{email}(email = ${email})}">Back to
+                        directory</a>
                 </div>
             </div>
         </div>

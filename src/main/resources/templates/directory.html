@@ -11,22 +11,52 @@
         <div class="row justify-content-center mt-4">
             <div class="col-md-8">
                 <div class="card p-4">
-                    <h3 class="text-center">Your buckets.</h3>
-                    <div th:if="${buckets != null}">
+                    <h3 class="text-center">Files</h3>
+                    <div th:if="${files != null}">
                         <ul class="list-group">
-                            <li th:each="bucket : ${buckets}" class="list-group-item">
-                                <a class="btn bth-primary" th:href="@{/bucket/{email}/{bucket}(email = ${user.email}, bucket = ${bucket})}"><span th:text="${bucket}"></span></a>
+                            <li th:each="file : ${files}" class="list-group-item">
+                                <a th:href="@{/file/{email}/{fileName}(email = ${user.email}, fileName = ${file.fileName})}"><span
+                                        th:text="${file.fileName}"></span></a>
+                                <span class="float-end" th:text="${#temporals.format(file.uploadDate, 'yyyy/MM/dd HH:mm')}"></span>
                             </li>
                         </ul>
                     </div>
-                    <div th:if="${buckets == null}">
-                        <p class="text-center">You don't have buckets.</p>
+                    <div th:if="${files == null}">
+                        <p class="text-center">Your bucket is empty.</p>
                     </div>
-                    <a class="btn btn-primary" th:href="@{/create/{email}(email = ${user.email})}">Create bucket</a>
+                    <a class="btn btn-primary"
+                       th:href="@{/add-file/{email}(email = ${user.email})}">Add
+                        file</a>
                 </div>
             </div>
         </div>
 
+
+<!--        <div class="row justify-content-center mt-5">-->
+<!--            <div class="col-md-5">-->
+<!--                <div class="card p-5">-->
+<!--                    <form method="post"-->
+<!--                          th:action="@{/update/{email}(email = ${user.email})}">-->
+<!--                        <label for="newBucketName">Change name:</label>-->
+<!--                        <input type="text" id="newBucketName" name="newBucketName">-->
+<!--                        <button class="btn btn-primary" type="submit">Submit</button>-->
+<!--                    </form>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </div>-->
+
+
+        <div class="row justify-content-center mt-4">
+            <div class="col-md-4">
+                <div class="card p-4">
+                    <form method="post"
+                          th:action="@{/delete/{email}(email = ${user.email})}">
+                        <input type="hidden" name="_method" value="delete">
+                        <button class="btn btn-danger w-100" type="submit">Delete directory</button>
+                    </form>
+                </div>
+            </div>
+        </div>
         <div class="row justify-content-center mt-4">
             <div class="col-md-4">
                 <div class="card p-4">

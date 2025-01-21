@@ -13,7 +13,7 @@
             <div class="col-md-6">
                 <div class="card p-4">
                     <h2 class="text-center">Upload file</h2>
-                    <form th:action="@{/add-file/{email}/{bucketName}(email = ${user.email}, bucketName = ${bucketName})}" method="post" enctype="multipart/form-data">
+                    <form th:action="@{/add-file/{email}(email = ${user.email})}" method="post" enctype="multipart/form-data">
                         <div class="mb-3 text-center ">
                             <label class="form-label" for="file">Select file:</label>
                         </div>
