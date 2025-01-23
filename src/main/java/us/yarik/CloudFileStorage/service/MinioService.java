@@ -28,7 +28,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-//TODO make download method
 @Service
 public class MinioService {
 

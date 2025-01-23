@@ -44,4 +44,12 @@ public class FileService {
     public void deleteFilesByOwner(String owner){
         fileRepository.deleteByOwner(owner);
     }
+
+    public File findById(String id){
+        Optional<File> file = fileRepository.findById(id);
+        if(file.isPresent()){
+            return file.get();
+        }
+        return file.orElse(null);
+     }
 }

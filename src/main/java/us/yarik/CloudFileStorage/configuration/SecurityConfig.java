@@ -7,9 +7,11 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.csrf.HttpSessionCsrfTokenRepository;
 import us.yarik.CloudFileStorage.security.CustomUserDetailsService;
 
 @Configuration
@@ -22,10 +24,12 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         return httpSecurity
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/login", "/registration", "/static/**", "/files", "/addFile", "/find-by-name")
+                        .requestMatchers("/login", "/registration", "/static/**")
                         .permitAll()
                         .anyRequest().authenticated()
                 )
+                //.csrf(AbstractHttpConfigurer::disable)
+                .csrf(csrf -> csrf.disable())
                 .formLogin(formLogin -> formLogin
                         .loginPage("/login")
                         .usernameParameter("email")
@@ -34,6 +38,7 @@ public class SecurityConfig {
                 .rememberMe(me -> me
                         .rememberMeParameter("rememberMe")
                         .tokenValiditySeconds(120000))
+
                 .logout(log -> log
                         .logoutUrl("/logout")
                         .logoutSuccessUrl("/login")

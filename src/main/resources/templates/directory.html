@@ -12,20 +12,10 @@
             <div class="col-md-8">
                 <div class="card p-4">
                     <h3 class="text-center">Files</h3>
-                    <div th:if="${files != null}">
-                        <ul class="list-group">
-                            <li th:each="file : ${files}" class="list-group-item">
-                                <a th:href="@{/file/{email}/{fileName}(email = ${user.email}, fileName = ${file.fileName})}"><span
-                                        th:text="${file.fileName}"></span></a>
-                                <span class="float-end" th:text="${#temporals.format(file.uploadDate, 'yyyy/MM/dd HH:mm')}"></span>
-                            </li>
-                        </ul>
-                    </div>
-                    <div th:if="${files == null}">
-                        <p class="text-center">Your bucket is empty.</p>
-                    </div>
+                    <ul id="fileList" class="list-group"></ul>
+                    <p id="emptyMassage" class="text-center d-none">Your directory is empty.</p>
                     <a class="btn btn-primary"
-                       th:href="@{/add-file/{email}(email = ${user.email})}">Add
+                       th:href="@{/add-file/{owner}}">Add
                         file</a>
                 </div>
             </div>
@@ -49,9 +39,7 @@
         <div class="row justify-content-center mt-4">
             <div class="col-md-4">
                 <div class="card p-4">
-                    <form method="post"
-                          th:action="@{/delete/{email}(email = ${user.email})}">
-                        <input type="hidden" name="_method" value="delete">
+                    <form method="post" id="delete-directory">
                         <button class="btn btn-danger w-100" type="submit">Delete directory</button>
                     </form>
                 </div>
@@ -61,7 +49,7 @@
             <div class="col-md-4">
                 <div class="card p-4">
                     <form name="logoutForm" th:action="@{/logout}" method="post">
-                        <input type="hidden" name="_csrf" th:value="${_csrf.token}">
+<!--                        <input type="hidden" name="_csrf" th:value="${_csrf.token}">-->
                         <button class="btn btn-danger w-100" type="submit">Logout</button>
                     </form>
                 </div>
@@ -69,6 +57,6 @@
         </div>
     </div>
 </section>
-
+<script src="/static/directory.js"></script>
 </body>
 </html>

@@ -3,14 +3,10 @@ package us.yarik.CloudFileStorage.controller;
 import io.minio.errors.*;
 import lombok.AllArgsConstructor;
 import org.springframework.core.io.ByteArrayResource;
-import org.springframework.core.io.InputStreamResource;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import us.yarik.CloudFileStorage.model.File;
@@ -43,10 +39,8 @@ public class DirectoryController {
     public String redirectToBalance(Authentication authentication) {
         String email = authentication.getName();
         Optional<User> user = userService.findByEmail(email);
-        return user.map(value -> "redirect:/directory/" + value.getEmail()).orElse("redirect:/login");
+        return user.map(value -> "redirect:/directory/" + value.getEmail().substring(0, value.getEmail().indexOf("@"))).orElse("redirect:/login");
     }
-
-
 
 
 //    @GetMapping("/create/{email}")
@@ -76,18 +70,13 @@ public class DirectoryController {
 //        }
 //    }
 
-    @GetMapping("/directory/{email}")
-    public String bucketGet(@PathVariable("email") String email,
+    @GetMapping("/directory/{owner}")
+    public String bucketGet(@PathVariable("owner") String owner,
                             Model model) {
-        List<File> files = fileService.findByOwner(email.substring(0, email.indexOf("@")));
-        Optional<User> user = userService.findByEmail(email);
-        if (user.isPresent()) {
-            model.addAttribute("files", files);
-            model.addAttribute("user", user.get());
-            return "directory";
-        }
-        return "redirect:/login";
-
+        List<File> files = fileService.findByOwner(owner);
+        model.addAttribute("files", files);
+        model.addAttribute("owner", owner);
+        return "directory";
     }
 
 
@@ -106,7 +95,7 @@ public class DirectoryController {
             String sanitizedFileName = fileName.replaceAll("[<>:\"/\\|?*]", "_");
             InputStream inputStream = file.getInputStream();
             String contentType = file.getContentType();
-            Path path = Paths.get( "bucket" + java.io.File.separator + email.substring(0, email.indexOf("@")) + "-"+ sanitizedFileName);
+            Path path = Paths.get("bucket" + java.io.File.separator + email.substring(0, email.indexOf("@")) + "-" + sanitizedFileName);
 
 
             File uploadFile = new File();
@@ -117,7 +106,7 @@ public class DirectoryController {
             uploadFile.setMinioPath(path.toString());
             uploadFile.setOwner(email.substring(0, email.indexOf("@")));
             fileService.uploadFile(uploadFile);
-            minioService.addFile(email.substring(0, email.indexOf("@")),fileName, inputStream, contentType);
+            minioService.addFile(email.substring(0, email.indexOf("@")), fileName, inputStream, contentType);
 
             return "redirect:/directory/" + email;
         } catch (Exception e) {
@@ -126,13 +115,13 @@ public class DirectoryController {
         }
     }
 
-    @DeleteMapping("/delete/{email}")
-    public String deleteBucket(@PathVariable("email") String email)
-            throws Exception {
-        minioService.deleteFilesByOwner(email.substring(0, email.indexOf("@")));
-        fileService.deleteFilesByOwner(email.substring(0, email.indexOf("@")));
-        return "redirect:/directory/" + email;
-    }
+//    @DeleteMapping("/delete-directory/{owner}")
+//    public String deleteBucket(@PathVariable("owner") String owner)
+//            throws Exception {
+//        minioService.deleteFilesByOwner(owner);
+//        fileService.deleteFilesByOwner(owner);
+//        return "redirect:/directory/" + owner;
+//    }
 
 //    @PostMapping("/update/{email}/{bucketName}")
 //    public String updateBucket(@PathVariable("email") String email, @PathVariable("bucketName") String oldBucketName,
@@ -146,7 +135,7 @@ public class DirectoryController {
 
     @GetMapping("/file/{email}/{fileName}")
     public String filePage(@PathVariable("email") String email,
-                           @PathVariable("fileName") String fileName, Model model){
+                           @PathVariable("fileName") String fileName, Model model) {
         model.addAttribute("email", email);
         model.addAttribute("file", fileService.findByOwnerAndFileName(
                 email.substring(0, email.indexOf("@")), fileName));
@@ -169,19 +158,19 @@ public class DirectoryController {
     @PostMapping("/update/{email}/{fileName}")
     public String renameFile(@PathVariable("email") String email,
                              @PathVariable("fileName") String fileName,
-                             @RequestParam("newFileName") String newFileName){
+                             @RequestParam("newFileName") String newFileName) {
         fileService.updateFileName(fileService.findByOwnerAndFileName(email.substring(0, email.indexOf("@")), fileName), newFileName);
         return "redirect:/directory/" + email;
     }
 
     //TODO make download method(maybe make logic on frontend)
-    @GetMapping("/download/{email}/{fileName}")
-    public ResponseEntity<ByteArrayResource> downloadFile(@PathVariable String email,
-                                                          @PathVariable String fileName){
-        ByteArrayResource file = minioService.downloadFile(email.substring(0, email.indexOf("@")) + "-" + fileName);
+    @GetMapping("/download/{fileId}")
+    public ResponseEntity<ByteArrayResource> downloadFile(@PathVariable String fileId) throws IOException {
+        File file = fileService.findById(fileId);
+        ByteArrayResource fileDownload = minioService.downloadFile(file.getOwner() + "-" + file.getFileName());
         return ResponseEntity.ok()
-                .header("Content-Disposition", "attachment; filename=" + fileName)
-                .body(file);
+                .header("Content-Disposition", "attachment; filename=" + file.getFileName())
+                .body(fileDownload);
     }
 
 
