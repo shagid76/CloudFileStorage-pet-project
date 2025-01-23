@@ -73,47 +73,47 @@ public class DirectoryController {
     @GetMapping("/directory/{owner}")
     public String bucketGet(@PathVariable("owner") String owner,
                             Model model) {
-        List<File> files = fileService.findByOwner(owner);
-        model.addAttribute("files", files);
-        model.addAttribute("owner", owner);
+//        List<File> files = fileService.findByOwner(owner);
+//        model.addAttribute("files", files);
+//        model.addAttribute("owner", owner);
         return "directory";
     }
 
 
-    @GetMapping("/add-file/{email}")
-    public String addFileGet(@PathVariable("email") String email,
-                             Model model) {
-        model.addAttribute("user", userService.findByEmail(email).get());
+    @GetMapping("/add-file/{owner}")
+    public String addFileGet(@PathVariable("owner") String owner, Model model) {
+
+
         return "add-file";
     }
 
-    @PostMapping("/add-file/{email}")
-    public String addFilePost(@PathVariable("email") String email,
-                              @RequestParam("file") MultipartFile file) throws Exception {
-        try {
-            String fileName = file.getOriginalFilename();
-            String sanitizedFileName = fileName.replaceAll("[<>:\"/\\|?*]", "_");
-            InputStream inputStream = file.getInputStream();
-            String contentType = file.getContentType();
-            Path path = Paths.get("bucket" + java.io.File.separator + email.substring(0, email.indexOf("@")) + "-" + sanitizedFileName);
-
-
-            File uploadFile = new File();
-            uploadFile.setFileName(file.getOriginalFilename());
-            uploadFile.setFileSize(file.getSize());
-            uploadFile.setFileType(file.getContentType());
-            uploadFile.setUploadDate(LocalDateTime.now());
-            uploadFile.setMinioPath(path.toString());
-            uploadFile.setOwner(email.substring(0, email.indexOf("@")));
-            fileService.uploadFile(uploadFile);
-            minioService.addFile(email.substring(0, email.indexOf("@")), fileName, inputStream, contentType);
-
-            return "redirect:/directory/" + email;
-        } catch (Exception e) {
-
-            throw new Exception("Error occurred while adding file: " + e.getMessage());
-        }
-    }
+//    @PostMapping("/add-file/{owner}")
+//    public String addFilePost(@PathVariable("owner") String owner,
+//                              @RequestParam("file") MultipartFile file) throws Exception {
+//        try {
+//            String fileName = file.getOriginalFilename();
+//            String sanitizedFileName = fileName.replaceAll("[<>:\"/\\|?*]", "_");
+//            InputStream inputStream = file.getInputStream();
+//            String contentType = file.getContentType();
+//            Path path = Paths.get("bucket" + java.io.File.separator + owner + "-" + sanitizedFileName);
+//
+//
+//            File uploadFile = new File();
+//            uploadFile.setFileName(file.getOriginalFilename());
+//            uploadFile.setFileSize(file.getSize());
+//            uploadFile.setFileType(file.getContentType());
+//            uploadFile.setUploadDate(LocalDateTime.now());
+//            uploadFile.setMinioPath(path.toString());
+//            uploadFile.setOwner(owner);
+//            fileService.uploadFile(uploadFile);
+//            minioService.addFile(owner, fileName, inputStream, contentType);
+//
+//            return "redirect:/directory/" + owner;
+//        } catch (Exception e) {
+//
+//            throw new Exception("Error occurred while adding file: " + e.getMessage());
+//        }
+//    }
 
 //    @DeleteMapping("/delete-directory/{owner}")
 //    public String deleteBucket(@PathVariable("owner") String owner)
@@ -163,9 +163,8 @@ public class DirectoryController {
         return "redirect:/directory/" + email;
     }
 
-    //TODO make download method(maybe make logic on frontend)
     @GetMapping("/download/{fileId}")
-    public ResponseEntity<ByteArrayResource> downloadFile(@PathVariable String fileId) throws IOException {
+    public ResponseEntity<ByteArrayResource> downloadFile(@PathVariable String fileId){
         File file = fileService.findById(fileId);
         ByteArrayResource fileDownload = minioService.downloadFile(file.getOwner() + "-" + file.getFileName());
         return ResponseEntity.ok()

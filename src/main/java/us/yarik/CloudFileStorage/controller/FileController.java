@@ -4,10 +4,15 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import us.yarik.CloudFileStorage.model.File;
 import us.yarik.CloudFileStorage.service.FileService;
 import us.yarik.CloudFileStorage.service.MinioService;
 
+import java.io.InputStream;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -31,18 +36,36 @@ public class FileController {
         fileService.updateFileName(file, file.getFileName() );
     }
 
-    @PostMapping("/addFile")
-    public File uploadFile(@RequestBody File file) {
-        return fileService.uploadFile(file);
+    @GetMapping("/all")
+    public List<File> all(){
+        return fileService.findAll();
     }
 
+    @PostMapping("/add-file/{owner}")
+    public ResponseEntity<String> addFilePost(@PathVariable("owner") String owner,
+                              @RequestParam("file") MultipartFile file) throws Exception {
+        try {
+            String fileName = file.getOriginalFilename();
+            String sanitizedFileName = fileName.replaceAll("[<>:\"/\\|?*]", "_");
+            InputStream inputStream = file.getInputStream();
+            String contentType = file.getContentType();
+            Path path = Paths.get("bucket" + java.io.File.separator + owner + "-" + sanitizedFileName);
 
-    @GetMapping("/find-by-name")
-    public ResponseEntity<List<File>> findFileByOwner(@RequestParam String owner) {
-        List<File> fileList = fileService.findByOwner(owner);
-        if (fileList.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+
+            File uploadFile = new File();
+            uploadFile.setFileName(file.getOriginalFilename());
+            uploadFile.setFileSize(file.getSize());
+            uploadFile.setFileType(file.getContentType());
+            uploadFile.setUploadDate(LocalDateTime.now());
+            uploadFile.setMinioPath(path.toString());
+            uploadFile.setOwner(owner);
+            fileService.uploadFile(uploadFile);
+            minioService.addFile(owner, fileName, inputStream, contentType);
+
+            return ResponseEntity.ok("File uploaded successfully");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error: " + e.getMessage());
         }
-        return ResponseEntity.ok(fileList);
     }
 }

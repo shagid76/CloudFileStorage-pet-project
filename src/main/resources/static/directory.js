@@ -58,3 +58,6 @@ document.getElementById("delete-directory").addEventListener("submit", (event) =
         })
 })
 
+const addFile = document.getElementById("add-file");
+addFile.href=`/add-file/${fileOwner}`;
+
