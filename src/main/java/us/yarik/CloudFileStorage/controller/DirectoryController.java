@@ -3,6 +3,8 @@ package us.yarik.CloudFileStorage.controller;
 import io.minio.errors.*;
 import lombok.AllArgsConstructor;
 import org.springframework.core.io.ByteArrayResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -17,6 +19,8 @@ import us.yarik.CloudFileStorage.service.UserService;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.InvalidKeyException;
@@ -73,17 +77,12 @@ public class DirectoryController {
     @GetMapping("/directory/{owner}")
     public String bucketGet(@PathVariable("owner") String owner,
                             Model model) {
-//        List<File> files = fileService.findByOwner(owner);
-//        model.addAttribute("files", files);
-//        model.addAttribute("owner", owner);
         return "directory";
     }
 
 
     @GetMapping("/add-file/{owner}")
     public String addFileGet(@PathVariable("owner") String owner, Model model) {
-
-
         return "add-file";
     }
 
@@ -142,17 +141,6 @@ public class DirectoryController {
         return "file";
     }
 
-    //TODO delete by path?, maybe make logic on frontend
-    @DeleteMapping("/delete/{email}/{fileName}")
-    public String deleteFile(@PathVariable("email") String email,
-                             @PathVariable("fileName") String fileName) throws ServerException,
-            InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException,
-            InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
-        minioService.deleteFile(fileName);
-        File file = fileService.findByOwnerAndFileName(email.substring(0, email.indexOf("@")), fileName);
-        fileService.deleteFile(file);
-        return "redirect:/directory/" + email;
-    }
 
     //TODO make it on frontend(pop-up window)
     @PostMapping("/update/{email}/{fileName}")
@@ -162,15 +150,4 @@ public class DirectoryController {
         fileService.updateFileName(fileService.findByOwnerAndFileName(email.substring(0, email.indexOf("@")), fileName), newFileName);
         return "redirect:/directory/" + email;
     }
-
-    @GetMapping("/download/{fileId}")
-    public ResponseEntity<ByteArrayResource> downloadFile(@PathVariable String fileId){
-        File file = fileService.findById(fileId);
-        ByteArrayResource fileDownload = minioService.downloadFile(file.getOwner() + "-" + file.getFileName());
-        return ResponseEntity.ok()
-                .header("Content-Disposition", "attachment; filename=" + file.getFileName())
-                .body(fileDownload);
-    }
-
-
 }

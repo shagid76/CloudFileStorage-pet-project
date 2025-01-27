@@ -25,6 +25,7 @@ public class File {
     private String minioPath;
     private String owner;
     private String parentFileId;
+    private String uuid;
 
 
 }
