@@ -46,11 +46,6 @@ public class FileController {
         minioService.deleteFilesByOwner(owner);
         fileService.deleteFilesByOwner(owner);
     }
-    @PostMapping("/updated-file-name")
-    public void updatedFileName(@RequestBody File file){
-        fileService.updateFileName(file, file.getFileName() );
-    }
-
     @GetMapping("/all")
     public List<File> all(){
         return fileService.findAll();
@@ -88,7 +83,7 @@ public class FileController {
     @GetMapping("/download/{fileId}")
     public ResponseEntity<byte[]> downloadFile(@PathVariable String fileId){
         File file = fileService.findById(fileId);
-        ByteArrayResource fileDownload = minioService.downloadFile(file.getOwner() + "-" + file.getFileName());
+        ByteArrayResource fileDownload = minioService.downloadFile(file.getOwner() + "-" + file.getFileName() + "-" + file.getUuid());
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename*=UTF-8''" +
                         URLEncoder.encode(file.getFileName().replace(" ", "_"), StandardCharsets.UTF_8))
@@ -125,5 +120,17 @@ public class FileController {
         InputStream inputStream = minioService.getFile(file.getOwner(), file.getFileName(), file.getUuid());
         minioService.addFile(file.getOwner(), file.getFileName(), inputStream , file.getFileType(), uuid);
     }
+
+    @PostMapping("/rename/{fileId}")
+    public ResponseEntity<String> renameFile(@PathVariable("fileId") String fileId, @RequestBody Map<String, String> request) throws
+            IOException {
+        String newFileName = request.get("newFileName");
+        String oldFileName = fileService.findById(fileId).getFileName();
+        fileService.updateFileName(fileService.findById(fileId), newFileName);
+        minioService.renameFile(oldFileName, newFileName,
+                fileService.findById(fileId).getOwner(), fileService.findById(fileId).getUuid() );
+        return ResponseEntity.ok("File rename seccessfully!");
+    }
+
 
 }

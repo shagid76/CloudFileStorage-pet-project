@@ -28,7 +28,6 @@ public class SecurityConfig {
                         .permitAll()
                         .anyRequest().authenticated()
                 )
-                //.csrf(AbstractHttpConfigurer::disable)
                 .csrf(csrf -> csrf.disable())
                 .formLogin(formLogin -> formLogin
                         .loginPage("/login")
