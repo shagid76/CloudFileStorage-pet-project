@@ -52,4 +52,16 @@ public class FileService {
         }
         return file.orElse(null);
      }
+
+     public List<File> findByFolder(String folder){
+        return fileRepository.findByFolder(folder);
+     }
+     public void setFolder(String fileId, String folder){
+        File file = findById(fileId);
+        file.setFolder(folder);
+     }
+
+     public void deleteFileFromFolder(File file){
+        file.setFolder(null);
+     }
 }

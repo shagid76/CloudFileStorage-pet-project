@@ -80,10 +80,21 @@ public class FileController {
                     .body("Error: " + e.getMessage());
         }
     }
+
     @GetMapping("/download/{fileId}")
     public ResponseEntity<byte[]> downloadFile(@PathVariable String fileId){
         File file = fileService.findById(fileId);
         ByteArrayResource fileDownload = minioService.downloadFile(file.getOwner() + "-" + file.getFileName() + "-" + file.getUuid());
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename*=UTF-8''" +
+                        URLEncoder.encode(file.getFileName().replace(" ", "_"), StandardCharsets.UTF_8))
+                .contentType(MediaType.valueOf(file.getFileType()))
+                .body(fileDownload.getByteArray());
+    }
+    @GetMapping("/download/{fileId}/{folder}")
+    public ResponseEntity<byte[]> downloadFileInFolder(@PathVariable String fileId, @PathVariable String folder){
+        File file = fileService.findById(fileId);
+        ByteArrayResource fileDownload = minioService.downloadFile(file.getOwner() + "-" + file.getFileName() + "-" + file.getUuid() + "-" + folder);
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename*=UTF-8''" +
                         URLEncoder.encode(file.getFileName().replace(" ", "_"), StandardCharsets.UTF_8))
@@ -96,6 +107,15 @@ public class FileController {
             InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
         File file = fileService.findById(fileId);
         minioService.deleteFile(file.getOwner() + "-" + file.getFileName() + "-" + file.getUuid());
+        fileService.deleteFile(file);
+    }
+
+    @DeleteMapping("/delete/{fileId}/{folder}")
+    public void deleteFileInFolder(@PathVariable("fileId") String fileId, @PathVariable("folder") String folder) throws ServerException,
+            InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException,
+            InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
+        File file = fileService.findById(fileId);
+        minioService.deleteFile(file.getOwner() + "-" + file.getFileName() + "-" + file.getUuid() + "-" + folder);
         fileService.deleteFile(file);
     }
 
@@ -121,8 +141,32 @@ public class FileController {
         minioService.addFile(file.getOwner(), file.getFileName(), inputStream , file.getFileType(), uuid);
     }
 
+    @PostMapping("/copy/{fileId}")
+    public void copyFileInFolder(@PathVariable("fileId") String fileId, @PathVariable("folder") String folder) throws IOException, ServerException,
+            InsufficientDataException, ErrorResponseException, NoSuchAlgorithmException, InvalidKeyException,
+            InvalidResponseException, XmlParserException, InternalException {
+        File file = fileService.findById(fileId);
+        String uuid = UUID.randomUUID().toString();
+        String sanitizedFileName = file.getFileName().replaceAll("[<>:\"/\\|?*]", "_");
+        Path path = Paths.get("bucket" + java.io.File.separator + file.getOwner() + "-" + sanitizedFileName + "-" + uuid + "-" + folder);
+
+        File fileCopy = new File();
+        fileCopy.setFileName(file.getFileName());
+        fileCopy.setFileType(file.getFileType());
+        fileCopy.setFileSize(file.getFileSize());
+        fileCopy.setUploadDate(LocalDateTime.now());
+        fileCopy.setOwner(file.getOwner());
+        fileCopy.setMinioPath(path.toString());
+        fileCopy.setUuid(uuid);
+        fileCopy.setFolder(folder);
+        fileService.uploadFile(fileCopy);
+        InputStream inputStream = minioService.getFile(file.getOwner(), file.getFileName(), file.getUuid());
+        minioService.addFile(file.getOwner(), file.getFileName(), inputStream , file.getFileType(), uuid);
+    }
+
     @PostMapping("/rename/{fileId}")
-    public ResponseEntity<String> renameFile(@PathVariable("fileId") String fileId, @RequestBody Map<String, String> request) throws
+    public ResponseEntity<String> renameFile(@PathVariable("fileId") String fileId,
+                                             @RequestBody Map<String, String> request) throws
             IOException {
         String newFileName = request.get("newFileName");
         String oldFileName = fileService.findById(fileId).getFileName();
@@ -130,6 +174,41 @@ public class FileController {
         minioService.renameFile(oldFileName, newFileName,
                 fileService.findById(fileId).getOwner(), fileService.findById(fileId).getUuid() );
         return ResponseEntity.ok("File rename seccessfully!");
+    }
+
+    @PostMapping("/rename/{fileId}")
+    public ResponseEntity<String> renameFileInFolder(@PathVariable("fileId") String fileId,
+                                                     @PathVariable("folder") String folder,
+                                             @RequestBody Map<String, String> request) throws
+            IOException {
+        String newFileName = request.get("newFileName");
+        String oldFileName = fileService.findById(fileId).getFileName();
+        fileService.updateFileName(fileService.findById(fileId), newFileName);
+        minioService.renameFileInFolder(oldFileName, newFileName,
+                fileService.findById(fileId).getOwner(), fileService.findById(fileId).getUuid(), folder );
+        return ResponseEntity.ok("File rename seccessfully!");
+    }
+
+    @GetMapping("/{folder}")
+    public List<File> getFilesByFolder(@PathVariable("folder") String folder){
+        return fileService.findByFolder(folder);
+    }
+    @PostMapping("/api/{fileId}/{folder}")
+    public void putFileToFolder(@PathVariable("fileId") String fileId, @PathVariable("folder") String folder){
+        File file = fileService.findById(fileId);
+        String fullFileName = file.getOwner() + "-" + file.getFileName() + "-" + file.getUuid();
+        minioService.uploadFileToFolder(fullFileName, folder);
+        fileService.setFolder(fileId, folder);
+    }
+
+    @PostMapping("/delete-file-from-folder/{fileId}/{folder}")
+    public void deleteFileFromFolder(@PathVariable("fildeId") String fileId,
+                                            @PathVariable("folder") String folder){
+        File file = fileService.findById(fileId);
+        String fullFileName = file.getOwner() + "-" + file.getFileName() + "-" + file.getUuid();
+        fileService.deleteFileFromFolder(file);
+        minioService.deleteFileFromFolder(fullFileName, folder);
+
     }
 
 

@@ -16,5 +16,5 @@ public interface FileRepository extends MongoRepository<File, ObjectId> {
     void deleteByOwner(String owner);
     Optional<File> findById(String id);
 
-
+    List<File> findByFolder(String folder);
 }
