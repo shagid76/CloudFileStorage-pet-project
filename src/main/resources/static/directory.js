@@ -11,8 +11,8 @@ fetch(`http://localhost:8080/files/${fileOwner}`)
     .then(files => {
         const fileList = document.getElementById("fileList");
         const emptyMessage = document.getElementById("emptyMessage");
-
-        if (files.length === 0) {
+        //TODO fix empty
+        if (files.length  === 0) {
             emptyMessage.classList.remove("d-none");
             return;
         }
@@ -136,8 +136,9 @@ if (deleteDirectoryForm) {
     });
 }
 
-const addFileLink = document.getElementById("add-file");
+const addFileLink = document.getElementById("upload-file");
 if (addFileLink) {
     addFileLink.href = `/add-file/${fileOwner}`;
 }
+
 

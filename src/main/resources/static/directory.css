@@ -28,3 +28,12 @@
     text-decoration: none;
     cursor: pointer;
 }
+.button-add-folder{
+    width: 49%;
+}
+.button-upload-file{
+    width: 49%;
+    margin-left: 1%;
+}
+
+
