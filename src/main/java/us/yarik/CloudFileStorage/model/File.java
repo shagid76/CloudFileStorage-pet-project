@@ -24,8 +24,9 @@ public class File {
     private LocalDateTime uploadDate;
     private String minioPath;
     private String owner;
-    private String folder;
     private String uuid;
 
+    private String parentId;
+    private boolean isFolder;
 
 }

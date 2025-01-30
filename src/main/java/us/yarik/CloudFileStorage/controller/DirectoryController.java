@@ -6,6 +6,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import us.yarik.CloudFileStorage.model.User;
 import us.yarik.CloudFileStorage.service.UserService;
 
@@ -26,19 +27,19 @@ public class DirectoryController {
     }
 
     @GetMapping("/directory/{owner}")
-    public String bucketGet(@PathVariable("owner") String owner,
+    public String directoryPage(@PathVariable("owner") String owner,
                             Model model) {
         return "directory";
     }
 
 
     @GetMapping("/add-file/{owner}")
-    public String addFileGet(@PathVariable("owner") String owner, Model model) {
+    public String addFilePage(@PathVariable("owner") String owner, Model model) {
         return "add-file";
     }
 
 
-    @GetMapping("/folder")
+    @GetMapping("/folder/{owner}/{fileName}")
     public String folderPage() {
         return "folder";
     }

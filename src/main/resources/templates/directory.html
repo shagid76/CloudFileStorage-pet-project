@@ -33,10 +33,33 @@
                             </div>
                         </div>
                     </div>
+
+                    <div id="modal-window-create-folder" class="modal-create-folder" style="display: none;">
+                        <div class="modal-dialog-create-folder">
+                            <div class="modal-content-create-folder">
+                                <div class="modal-header-create-folder">
+                                    <h5 class="modal-title-create-folder">Create folder</h5>
+                                    <button type="button" class="btn-close" id="close-modal-create-folder"
+                                            aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body-create-folder">
+                                    <form method="post" id="create-folder-post">
+                                        <label for="folderName" class="form-label">Enter folder name:</label>
+                                        <input type="text" id="folderName" class="form-control" required/>
+                                        <button class="btn btn-primary w-100 mt-3" type="submit">Create</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+
+
                     <p id="emptyMassage" class="text-center d-none">Your directory is empty</p>
                     <div class="two-buttons">
                         <a class="btn btn-primary button-upload-file" id="upload-file">Upload file</a>
-                        <a class="btn btn-primary button-add-folder" id="add-folder">Add folder</a>
+                        <a class="btn btn-primary button-add-folder" id="create-folder">Create folder</a>
                     </div>
                 </div>
             </div>
