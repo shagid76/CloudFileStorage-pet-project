@@ -13,7 +13,7 @@
         <div class="row justify-content-center mt-4">
             <div class="col-md-8">
                 <div class="card p-4">
-                    <h3 class="text-center">Files</h3>
+                    <h3 class="text-center">Directory</h3>
                     <ul id="fileList" class="list-group"></ul>
                     <div id="modal-window" class="modal" style="display: none;">
                         <div class="modal-dialog">
@@ -34,15 +34,15 @@
                         </div>
                     </div>
 
-                    <div id="modal-window-create-folder" class="modal-create-folder" style="display: none;">
-                        <div class="modal-dialog-create-folder">
-                            <div class="modal-content-create-folder">
-                                <div class="modal-header-create-folder">
-                                    <h5 class="modal-title-create-folder">Create folder</h5>
+                    <div id="modal-window-create-folder" class="modal" style="display: none;">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Create folder</h5>
                                     <button type="button" class="btn-close" id="close-modal-create-folder"
                                             aria-label="Close"></button>
                                 </div>
-                                <div class="modal-body-create-folder">
+                                <div class="modal-body">
                                     <form method="post" id="create-folder-post">
                                         <label for="folderName" class="form-label">Enter folder name:</label>
                                         <input type="text" id="folderName" class="form-control" required/>
