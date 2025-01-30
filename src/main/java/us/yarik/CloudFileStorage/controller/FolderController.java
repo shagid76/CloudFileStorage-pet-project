@@ -1,28 +1,20 @@
 package us.yarik.CloudFileStorage.controller;
 
-import io.minio.errors.*;
 import lombok.RequiredArgsConstructor;
-import org.springframework.core.io.ByteArrayResource;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import us.yarik.CloudFileStorage.dto.FolderDTO;
 import us.yarik.CloudFileStorage.model.File;
 import us.yarik.CloudFileStorage.service.FileService;
 import us.yarik.CloudFileStorage.service.MinioService;
 
-import java.io.IOException;
 import java.io.InputStream;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -32,7 +24,7 @@ public class FolderController {
     private final MinioService minioService;
 
     @PostMapping("/create-folder")
-    public ResponseEntity<File> createFolder(@RequestBody FolderDTO folderDTO){
+    public ResponseEntity<File> createFolder(@RequestBody FolderDTO folderDTO) {
         File folder = File.builder()
                 .fileName(folderDTO.getFolderName())
                 .isFolder(true)
@@ -44,6 +36,11 @@ public class FolderController {
 
         fileService.uploadFile(folder);
         return ResponseEntity.ok(folder);
+    }
+
+    @GetMapping("/files/folder/{parentId}")
+    public List<File> allFilesFromFolder(@PathVariable("parentId") String parentId) {
+        return fileService.findByParentId(parentId);
     }
 
 //    @GetMapping("/download/{fileId}/{folder}")
@@ -101,10 +98,6 @@ public class FolderController {
 //        return ResponseEntity.ok("File rename seccessfully!");
 //    }
 //
-    @GetMapping("/{parentId}")
-    public List<File> getFilesByFolder(@PathVariable("parentId") String parentId){
-        return fileService.findByParentId(parentId);
-    }
 //    @PostMapping("/api/{fileId}/{folder}")
 //    public void putFileToFolder(@PathVariable("fileId") String fileId, @PathVariable("folder") String folder){
 //        File file = fileService.findById(fileId);
@@ -122,5 +115,38 @@ public class FolderController {
 //        minioService.deleteFileFromFolder(fullFileName, folder);
 //
 //    }
+
+    @PostMapping("/add-file/{owner}/{parentId}")
+    public ResponseEntity<String> addFileToFolder(@PathVariable("owner") String owner,
+                                                  @PathVariable("parentId") String parentId,
+                                                  @RequestParam("file") MultipartFile file) {
+        try {
+            String uuid = UUID.randomUUID().toString();
+            String fileName = file.getOriginalFilename();
+            String sanitizedFileName = fileName.replaceAll("[<>:\"/\\|?*]", "_");
+            InputStream inputStream = file.getInputStream();
+            String contentType = file.getContentType();
+            Path path = Paths.get("bucket" + java.io.File.separator + owner + "-" + sanitizedFileName + "-" + uuid + "-" + parentId);
+
+            File newFile = File.builder()
+                    .fileName(file.getOriginalFilename())
+                    .fileSize(file.getSize())
+                    .fileType(file.getContentType())
+                    .uploadDate(LocalDateTime.now())
+                    .owner(owner)
+                    .minioPath(path.toString())
+                    .uuid(uuid)
+                    .parentId(parentId)
+                    .build();
+
+            fileService.uploadFile(newFile);
+            minioService.addFile(owner, fileName, inputStream, contentType, uuid, parentId);
+
+            return ResponseEntity.ok("File uploaded successfully!");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error " + e.getMessage());
+        }
+    }
 
 }

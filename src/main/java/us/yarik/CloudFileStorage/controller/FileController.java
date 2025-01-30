@@ -35,7 +35,7 @@ public class FileController {
 
     @GetMapping("/files/{owner}")
     public List<File> getAllFiles(@PathVariable("owner") String owner) {
-        return fileService.findByOwner(owner);
+        return fileService.findByOwnerAndParentIdIsNull(owner);
     }
 
     @DeleteMapping("/delete-directory/{owner}")

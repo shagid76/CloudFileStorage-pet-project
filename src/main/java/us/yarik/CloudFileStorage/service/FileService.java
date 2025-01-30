@@ -21,9 +21,10 @@ public class FileService {
         return fileRepository.save(file);
     }
 
-    public List<File> findByOwner(String owner) {
-        return fileRepository.findByOwner(owner);
+    public List<File> findByOwnerAndParentIdIsNull(String owner) {
+        return fileRepository.findByOwnerAndParentIdIsNull(owner);
     }
+
 
     public void deleteFile(File file) {
         fileRepository.delete(file);

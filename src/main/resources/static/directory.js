@@ -192,7 +192,6 @@ document.getElementById("create-folder").addEventListener("click", async () =>{
             alert("Folder name cannot be empty!");
             return;
         }
-        //const parentId = document.getElementById("parent-id").value || '-';
 
         fetch(`/create-folder`, {
             method: "POST",

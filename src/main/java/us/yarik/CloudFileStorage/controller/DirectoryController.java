@@ -38,6 +38,11 @@ public class DirectoryController {
         return "add-file";
     }
 
+    @GetMapping("/add-file/{owner}/{folder}")
+    public String addFilePageToFolder(@PathVariable("owner") String owner, Model model) {
+        return "add-file";
+    }
+
 
     @GetMapping("/folder/{owner}/{fileName}")
     public String folderPage() {

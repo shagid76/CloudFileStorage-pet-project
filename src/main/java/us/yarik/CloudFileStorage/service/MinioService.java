@@ -50,6 +50,14 @@ public class MinioService {
                 .stream(inputStream, -1, 10485760)
                 .build());
     }
+    public void addFile(String owner, String fileName, InputStream inputStream, String contentType, String uuid, String folder) throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
+        minioClient.putObject(PutObjectArgs.builder()
+                .bucket(bucketName)
+                .object(owner + "-" + fileName + "-" + uuid + "-" + folder)
+                .contentType(contentType)
+                .stream(inputStream, -1, 10485760)
+                .build());
+    }
 
     public List<String> allObjectsByOwner(String owner) throws Exception {
         Iterable<Result<Item>> result = minioClient.listObjects(ListObjectsArgs.builder()
