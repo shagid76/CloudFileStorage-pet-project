@@ -1,5 +1,5 @@
 const urlParts = window.location.pathname.split('/');
-if(urlParts === 3) {
+if(urlParts.length === 3) {
     const fileOwner = urlParts[urlParts.length - 1];
 
     document.getElementById("add-file").addEventListener("submit", (event) => {

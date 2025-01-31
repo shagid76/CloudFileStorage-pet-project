@@ -47,7 +47,7 @@ fetch(`http://localhost:8080/files/${fileOwner}`)
                 <li><a class="dropdown-item delete-file" href="#" data-file-id="${file.id}">Delete file</a></li>
                 <li><a class="dropdown-item rename-file" href="#" data-file-id="${file.id}">Rename file</a></li>
                 <li><a class="dropdown-item copy-file" href="#" data-file-id="${file.id}">Copy file</a></li>
-                <li><a class="dropdown-item" href="#">Put to folder</a></li>
+                <li><a class="dropdown-item put-to-folder" href="#" data-file-id="${file.id}">Put to folder</a></li>
                 <li><a class="dropdown-item download-file" href="#" data-file-id="${file.id}">Download</a></li>
             </ul>
         </div>
@@ -68,7 +68,7 @@ fetch(`http://localhost:8080/files/${fileOwner}`)
                 <li><a class="dropdown-item delete-file" href="#" data-file-id="${file.id}">Delete folder</a></li>
                 <li><a class="dropdown-item rename-file" href="#" data-file-id="${file.id}">Rename folder</a></li>
                 <li><a class="dropdown-item copy-file" href="#" data-file-id="${file.id}">Copy folder</a></li>
-                <li><a class="dropdown-item" href="#">Put to folder</a></li>
+                <li><a class="dropdown-item put-to-folder" href="#" data-file-id="${file.id}">Put to folder</a></li>
                 <li><a class="dropdown-item download-file" href="#" data-file-id="${file.id}">Download</a></li>
             </ul>
         </div>
@@ -153,6 +153,45 @@ fetch(`http://localhost:8080/files/${fileOwner}`)
                 const fileId = target.getAttribute('data-file-id');
                 const downloadUrl = `/download/${fileId}`;
                 window.location.href = downloadUrl;
+            }else if(target.classList.contains('put-to-folder')){
+                console.log(fileId)
+                const modal = document.getElementById("modal-window-put-to-folder");
+                const closeModal = document.getElementById("close-modal-put-to-folder");
+                const putForm = document.getElementById("put-to-folder-post");
+                const parentId = document.getElementById("parentId");
+                modal.style.display = "block";
+
+                closeModal.onclick = () => modal.style.display = "none";
+                window.onclick = event => { if (event.target === modal) modal.style.display = "none"; };
+
+                putForm.onsubmit = event => {
+                    event.preventDefault();
+                    const parentID = parentId.value.trim();
+                    if (!parentID) {
+                        alert("Folder name cannot be empty!");
+                        return;
+                    }
+                    fetch(`/put-file-to-folder/${fileId}`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ parentID })
+                    })
+                        .then(response =>{
+                            if(!response.ok){
+                                throw new Error(`Error: ${response.status}`);
+                            }
+                            return response.text();
+                        })
+                        .then(data => {
+                            modal.style.display = "none";
+                            location.reload();
+                        })
+                        .catch(error =>{
+                            console.error(error);
+                        })
+
+
+                };
             }
         });
     });

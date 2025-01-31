@@ -59,6 +59,25 @@ fetch(`/files/folder/${parentId}`)
         });
     });
 
+
+fileList.addEventListener('click', event => {
+    event.preventDefault();
+    const target = event.target;
+    const fileId = target.getAttribute('data-file-id');
+
+    if (!fileId) return;
+
+    if (target.classList.contains('delete-file')) {
+        fetch(`/delete/${fileId}`, {method: "DELETE"})
+            .then(response => {
+                if (!response.ok) throw new Error(`Error: ${response.status}`);
+                return response.text();
+            })
+            .then(() => location.reload())
+            .catch(console.error);
+    }
+});
+
 document.getElementById("back-to-directory").addEventListener("click", event => {
     const target = event.target;
     if (target.classList.contains("back-to-directory")) {

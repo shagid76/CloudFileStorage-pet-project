@@ -58,4 +58,14 @@ public class FileService {
         return fileRepository.findByParentId(parentId);
      }
 
+     public void putFileToFolder(String parentId, String fileId){
+        File file = findById(fileId);
+        file.setParentId(parentId);
+        file.setMinioPath(file.getMinioPath() + "-" + parentId);
+        fileRepository.save(file);
+     }
+     public List<File> findByOwnerAndFolderIsTrue(String owner){
+        return fileRepository.findByOwnerAndFolderIsTrue(owner);
+     }
+
 }

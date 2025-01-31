@@ -169,7 +169,7 @@ public class MinioService {
         );
     }
 
-    public void uploadFileToFolder(String fullFileName, String folder){
+    public void uploadFileToFolder(String fullFileName, String parentId){
         try {
 
             CopySource copySource = CopySource.builder()
@@ -180,7 +180,7 @@ public class MinioService {
             minioClient.copyObject(
                     CopyObjectArgs.builder()
                             .bucket(bucketName)
-                            .object(fullFileName + "-" + folder)
+                            .object(fullFileName + "-" + parentId)
                             .source(copySource)
                             .build()
             );

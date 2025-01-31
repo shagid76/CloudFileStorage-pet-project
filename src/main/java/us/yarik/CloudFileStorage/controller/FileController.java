@@ -38,6 +38,8 @@ public class FileController {
         return fileService.findByOwnerAndParentIdIsNull(owner);
     }
 
+    //TODO put to folder - owner, folderName, fileId
+    //TODO fix - now method dont delete files on folder
     @DeleteMapping("/delete-directory/{owner}")
     public void deleteDirectory(@PathVariable("owner") String owner) throws Exception {
         minioService.deleteFilesByOwner(owner);
@@ -131,6 +133,23 @@ public class FileController {
         fileService.updateFileName(fileService.findById(fileId), newFileName);
         minioService.renameFile(oldFileName, newFileName,
                 fileService.findById(fileId).getOwner(), fileService.findById(fileId).getUuid());
-        return ResponseEntity.ok("File rename seccessfully!");
+        return ResponseEntity.ok("File rename successfully!");
     }
+
+    @PostMapping("/put-file-to-folder/{fileId}")
+    public ResponseEntity<String> putFileToFolder(@PathVariable("fileId") String fileId, @RequestBody Map<String, String> request) {
+        String parentId = request.get("parentID");
+        System.out.println(parentId);
+        File file = fileService.findById(fileId);
+        fileService.putFileToFolder(parentId, fileId);
+        minioService.uploadFileToFolder(file.getOwner() + "-" + file.getFileName() + "-" + file.getUuid(),
+                parentId);
+        return ResponseEntity.ok("File putted successfully!");
+    }
+
+    @GetMapping("/all-folders/{owner}")
+    public List<File> allFoldersByOwner(@PathVariable("owner") String owner) {
+        return fileService.findByOwnerAndFolderIsTrue(owner);
+    }
+
 }

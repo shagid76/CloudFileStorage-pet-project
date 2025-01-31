@@ -52,11 +52,30 @@
                             </div>
                         </div>
                     </div>
+                    <div id="modal-window-put-to-folder" class="modal" >
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Select Folder</h5>
+                                    <button type="button" class="btn-close" id="close-modal-put-to-folder" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <form id="put-to-folder-post">
+                                        <label for="parentId" class="form-label">Choose folder:</label>
+                                        <input type="text" id="parentId" class="form-control" required/>
+<!--                                        <div id="folder-list" class="mt-3 border p-2" style="max-height: 200px; overflow-y: auto;">-->
+<!--                                            <p class="text-muted">Loading folders...</p>-->
+<!--                                        </div>-->
+                                        <button class="btn btn-primary w-100 mt-3" type="submit">Select</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
 
 
-
-                    <p id="emptyMessage" class="text-center d-none">Your directory is empty</p>
+                    <p id="emptyMe  ssage" class="text-center d-none">Your directory is empty</p>
                     <div class="two-buttons">
                         <a class="btn btn-primary button-upload-file" id="upload-file">Upload file</a>
                         <a class="btn btn-primary button-add-folder" id="create-folder">Create folder</a>
