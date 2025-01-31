@@ -138,8 +138,8 @@ public class FileController {
 
     @PostMapping("/put-file-to-folder/{fileId}")
     public ResponseEntity<String> putFileToFolder(@PathVariable("fileId") String fileId, @RequestBody Map<String, String> request) {
-        String parentId = request.get("parentID");
-        System.out.println(parentId);
+        String folderId = request.get("parentID");
+        String parentId = fileService.findById(folderId).getFileName();
         File file = fileService.findById(fileId);
         fileService.putFileToFolder(parentId, fileId);
         minioService.uploadFileToFolder(file.getOwner() + "-" + file.getFileName() + "-" + file.getUuid(),
@@ -148,8 +148,15 @@ public class FileController {
     }
 
     @GetMapping("/all-folders/{owner}")
-    public List<File> allFoldersByOwner(@PathVariable("owner") String owner) {
-        return fileService.findByOwnerAndFolderIsTrue(owner);
+    public ResponseEntity<List<File>> allFoldersByOwner(@PathVariable("owner") String owner) {
+        try {
+            List<File> folders = fileService.findByOwnerAndIsFolderIsTrue(owner);
+            return ResponseEntity.ok(folders);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
+
 
 }

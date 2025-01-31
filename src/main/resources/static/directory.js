@@ -254,7 +254,29 @@ document.getElementById("create-folder").addEventListener("click", async () =>{
             });
     };
 })
-
+$('#parentId').select2({
+    placeholder: "Search folders...",
+    allowClear: true,
+    ajax: {
+        url: `/all-folders/${fileOwner}`,
+        dataType: 'json',
+        delay: 250,
+        data: function (params) {
+            return { q: params.term };
+        },
+        processResults: function (data) {
+            return {
+                results: data.map(function (file) {
+                    return {
+                        id: file.id,
+                        text: file.fileName
+                    };
+                })
+            };
+        },
+        cache: true
+    }
+});
 
 
 

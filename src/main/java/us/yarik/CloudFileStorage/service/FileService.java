@@ -64,8 +64,8 @@ public class FileService {
         file.setMinioPath(file.getMinioPath() + "-" + parentId);
         fileRepository.save(file);
      }
-     public List<File> findByOwnerAndFolderIsTrue(String owner){
-        return fileRepository.findByOwnerAndFolderIsTrue(owner);
+     public List<File> findByOwnerAndIsFolderIsTrue(String owner){
+        return fileRepository.findByOwnerAndIsFolderIsTrue(owner);
      }
 
 }
