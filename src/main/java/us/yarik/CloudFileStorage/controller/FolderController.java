@@ -15,16 +15,23 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+//directory
+//TODO rename folder(fix)
+//TODO delete folder(dont delete files and folders on that folder)
+//TODO copy folder
+//TODO put folder to folder
+//TODO download folder?
 
-//TODO folder on folder
-//TODO delete folder
-//TODO rename file on folder
-//TODO copy file on folder
-//TODO put to folder on folder
-//TODO download on folder
-//TODO create folder on folder
-//TODO delete file on folder(maybe already created)
+//TODO delete folder(red button)
+//TODO rename file on folder(folder page)
+//TODO copy file on folder(folder page)
+//TODO put to folder on folder(folder page)
+//TODO download on folder(folder page)
+//TODO delete files form folder(folder page)
+
+//TODO file finder
 @RestController
 @RequiredArgsConstructor
 public class FolderController {
@@ -155,6 +162,14 @@ public class FolderController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Error " + e.getMessage());
         }
+    }
+    @GetMapping("/check-folder-name/{folderName}")
+    public ResponseEntity<?> checkFolderName(@PathVariable("folderName") String folderName,
+                                             @RequestParam String owner){
+        File file = fileService.findByOwnerAndFileName(owner,  folderName);
+        boolean isNameUnique = (file == null);
+        System.out.println(isNameUnique);
+        return ResponseEntity.ok().body(Map.of("isNameUnique", isNameUnique));
     }
 
 }

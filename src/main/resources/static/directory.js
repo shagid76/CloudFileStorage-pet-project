@@ -1,7 +1,7 @@
 const urlParts = window.location.pathname.split('/');
-const fileOwner = urlParts[urlParts.length - 1];
+const owner = urlParts[urlParts.length - 1];
 
-fetch(`http://localhost:8080/files/${fileOwner}`)
+fetch(`http://localhost:8080/files/${owner}`)
     .then(response => {
         if (!response.ok) {
             throw new Error(`Error: ${response.status}`);
@@ -81,7 +81,7 @@ fetch(`http://localhost:8080/files/${fileOwner}`)
                     if (target.classList.contains("folder-page-link")) {
                         event.preventDefault();
                         const folderName = target.textContent.trim();
-                        window.location.href = `/folder/${fileOwner}/${folderName}`;
+                        window.location.href = `/folder/${owner}/${folderName}`;
                         return;
                     }
                 });
@@ -201,10 +201,10 @@ const deleteDirectoryForm = document.getElementById("delete-directory");
 if (deleteDirectoryForm) {
     deleteDirectoryForm.addEventListener("submit", event => {
         event.preventDefault();
-        fetch(`http://localhost:8080/delete-directory/${fileOwner}`, { method: "DELETE" })
+        fetch(`http://localhost:8080/delete-directory/${owner}`, { method: "DELETE" })
             .then(response => {
                 if (!response.ok) throw new Error(`Error: ${response.status}`);
-                window.location.href = `/directory/${fileOwner}`;
+                window.location.href = `/directory/${owner}`;
             })
             .catch(console.error);
     });
@@ -212,8 +212,9 @@ if (deleteDirectoryForm) {
 
 const addFileLink = document.getElementById("upload-file");
 if (addFileLink) {
-    addFileLink.href = `/add-file/${fileOwner}`;
+    addFileLink.href = `/add-file/${owner}`;
 }
+
 document.getElementById("create-folder").addEventListener("click", async () =>{
     const modal = document.getElementById("modal-window-create-folder");
     const closeModal = document.getElementById("close-modal-create-folder");
@@ -225,41 +226,55 @@ document.getElementById("create-folder").addEventListener("click", async () =>{
     closeModal.onclick = () => modal.style.display = "none";
     window.onclick = event => { if (event.target === modal) modal.style.display = "none"; };
 
-    createForm.onsubmit = event => {
+    createForm.onsubmit = async event => {
         event.preventDefault();
         const folderNameValue = folderName.value.trim();
-        if (!folderName) {
-            alert("Folder name cannot be empty!");
-            return;
-        }
 
-        fetch(`/create-folder`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                folderName: folderNameValue,
-                parentId: null,
-                owner: fileOwner
+        try {
+            const response = await fetch(`/check-folder-name/${encodeURIComponent(folderNameValue)}?owner=${encodeURIComponent(owner)}`);
+            if (!response.ok) {
+                throw new Error(`Error: ${response.status}`);
+            }
+            const { isNameUnique } = await response.json();
+
+            if (!isNameUnique) {
+                alert("Folder with this name already exists!");
+                return;
+            }
+
+            fetch(`/create-folder`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    folderName: folderNameValue,
+                    parentId: null,
+                    owner: owner
+                })
             })
-        })
-            .then(response => {
-                if (!response.ok) throw new Error(`Error: ${response.status}`);
-                return response.json();
-            })
-            .then(() => {
-                modal.style.display = "none";
-                location.reload();
-            })
-            .catch(error => {
-                console.error(error);
-            });
+                .then(response => {
+                    if (!response.ok) throw new Error(`Error: ${response.status}`);
+                    return response.json();
+                })
+                .then(() => {
+                    modal.style.display = "none";
+                    location.reload();
+                })
+                .catch(error => {
+                    console.error(error);
+                });
+
+        } catch (error) {
+            console.error(error);
+        }
     };
 })
+
+
 $('#parentId').select2({
     placeholder: "Search folders...",
     allowClear: true,
     ajax: {
-        url: `/all-folders/${fileOwner}`,
+        url: `/all-folders/${owner}`,
         dataType: 'json',
         delay: 250,
         data: function (params) {

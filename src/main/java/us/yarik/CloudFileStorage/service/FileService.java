@@ -68,4 +68,12 @@ public class FileService {
         return fileRepository.findByOwnerAndIsFolderIsTrue(owner);
      }
 
+     public File findByOwnerAndParentIdAndFileName(String owner, String parentId, String fileName){
+        Optional<File> file = fileRepository.findByOwnerAndParentIdAndFileName(owner, parentId, fileName);
+        if(file.isPresent()){
+            return file.get();
+        }
+        return file.orElse(null);
+     }
+
 }
