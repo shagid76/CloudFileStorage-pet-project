@@ -11,9 +11,10 @@ fetch(`http://localhost:8080/files/${fileOwner}`)
     .then(files => {
         const fileList = document.getElementById("fileList");
         const emptyMessage = document.getElementById("emptyMessage");
-        //TODO fix empty
+
         if (files.length  === 0) {
             emptyMessage.classList.remove("d-none");
+            fileList.classList.add("d-none");
             return;
         }
         files.forEach(file => {

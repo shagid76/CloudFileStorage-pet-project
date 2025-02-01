@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+
 @RestController
 @RequiredArgsConstructor
 public class FileController {
@@ -38,7 +39,7 @@ public class FileController {
         return fileService.findByOwnerAndParentIdIsNull(owner);
     }
 
-    //TODO put to folder - owner, folderName, fileId
+
     //TODO fix - now method dont delete files on folder
     @DeleteMapping("/delete-directory/{owner}")
     public void deleteDirectory(@PathVariable("owner") String owner) throws Exception {
@@ -97,7 +98,11 @@ public class FileController {
             InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException,
             InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
         File file = fileService.findById(fileId);
-        minioService.deleteFile(file.getOwner() + "-" + file.getFileName() + "-" + file.getUuid());
+        if (file.getParentId() == null) {
+            minioService.deleteFile(file.getOwner() + "-" + file.getFileName() + "-" + file.getUuid());
+        } else {
+            minioService.deleteFile(file.getOwner() + "-" + file.getFileName() + "-" + file.getUuid() + "-" + file.getParentId());
+        }
         fileService.deleteFile(file);
     }
 

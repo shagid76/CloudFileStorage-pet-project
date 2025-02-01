@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-//TODO parentFileId it's for folder
+
 public class File {
     @Id
     private String id;
