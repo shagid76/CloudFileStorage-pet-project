@@ -140,6 +140,13 @@ public class FileController {
                 fileService.findById(fileId).getOwner(), fileService.findById(fileId).getUuid());
         return ResponseEntity.ok("File rename successfully!");
     }
+    @PostMapping("/rename-folder/{fileId}")
+    public ResponseEntity<String> renameFolder(@PathVariable("fileId") String fileId,
+                                             @RequestBody Map<String, String> request){
+        String newFileName = request.get("newFolderName");
+        fileService.updateFileName(fileService.findById(fileId), newFileName);
+        return ResponseEntity.ok("Folder rename successfully!");
+    }
 
     @PostMapping("/put-file-to-folder/{fileId}")
     public ResponseEntity<String> putFileToFolder(@PathVariable("fileId") String fileId, @RequestBody Map<String, String> request) {

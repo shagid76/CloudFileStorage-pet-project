@@ -18,7 +18,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 //directory
-//TODO rename folder(fix)
 //TODO delete folder(dont delete files and folders on that folder)
 //TODO copy folder
 //TODO put folder to folder

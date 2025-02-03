@@ -66,11 +66,11 @@ fetch(`http://localhost:8080/files/${owner}`)
                 </svg>
             </a>
             <ul class="dropdown-menu" aria-labelledby="dropdownMenuLink">
-                <li><a class="dropdown-item delete-file" href="#" data-file-id="${file.id}">Delete folder</a></li>
-                <li><a class="dropdown-item rename-file" href="#" data-file-id="${file.id}">Rename folder</a></li>
-                <li><a class="dropdown-item copy-file" href="#" data-file-id="${file.id}">Copy folder</a></li>
-                <li><a class="dropdown-item put-to-folder" href="#" data-file-id="${file.id}">Put to folder</a></li>
-                <li><a class="dropdown-item download-file" href="#" data-file-id="${file.id}">Download</a></li>
+                <li><a class="dropdown-item delete-folder" href="#" data-file-id="${file.id}">Delete folder</a></li>
+                <li><a class="dropdown-item rename-folder" href="#" data-file-id="${file.id}">Rename folder</a></li>
+                <li><a class="dropdown-item copy-folder" href="#" data-file-id="${file.id}">Copy folder</a></li>
+                <li><a class="dropdown-item put-folder-to-folder" href="#" data-file-id="${file.id}">Put to folder</a></li>
+                <li><a class="dropdown-item download-folder" href="#" data-file-id="${file.id}">Download</a></li>
             </ul>
         </div>
     </li>`
@@ -192,6 +192,41 @@ fetch(`http://localhost:8080/files/${owner}`)
                         })
 
 
+                };
+            }else if(target.classList.contains("rename-folder")){
+                const modal = document.getElementById("modal-window-rename-folder");
+                const closeModal = document.getElementById("close-modal-rename-folder");
+                const renameForm = document.getElementById("rename-folder-post");
+                const newFolderNameInput = document.getElementById("newFolderName");
+
+                modal.style.display = "block";
+
+                closeModal.onclick = () => modal.style.display = "none";
+                window.onclick = event => { if (event.target === modal) modal.style.display = "none"; };
+
+                renameForm.onsubmit = event => {
+                    event.preventDefault();
+                    const newFolderName = newFolderNameInput.value.trim();
+                    if (!newFolderName) {
+                        alert("Folder name cannot be empty!");
+                        return;
+                    }
+                    fetch(`/rename-folder/${fileId}`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ newFolderName })
+                    })
+                        .then(response => {
+                            if (!response.ok) throw new Error(`Error: ${response.status}`);
+                            return response.text();
+                        })
+                        .then(() => {
+                            modal.style.display = "none";
+                            location.reload();
+                        })
+                        .catch(error => {
+                            console.error(error);
+                        });
                 };
             }
         });
