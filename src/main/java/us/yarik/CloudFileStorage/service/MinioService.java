@@ -169,6 +169,17 @@ public class MinioService {
                         .build()
         );
     }
+    public InputStream getFileFromFolder(String owner, String fileName, String uuid, String folder) throws ServerException, InsufficientDataException,
+            ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, XmlParserException,
+            InvalidResponseException, InternalException {
+
+        return minioClient.getObject(
+                GetObjectArgs.builder()
+                        .bucket(bucketName)
+                        .object(owner + "-" + fileName + "-" + uuid + "-" + folder)
+                        .build()
+        );
+    }
 
     public void uploadFileToFolder(String fullFileName, String parentId){
         try {

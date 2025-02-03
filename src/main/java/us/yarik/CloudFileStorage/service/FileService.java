@@ -76,4 +76,8 @@ public class FileService {
         return file.orElse(null);
      }
 
+     public List<File> findByOwnerAndFileNameList(String owner, String fileName){
+        return fileRepository.findAllByOwnerAndParentId(owner, fileName);
+     }
+
 }

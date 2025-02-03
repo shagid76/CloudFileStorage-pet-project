@@ -228,6 +228,14 @@ fetch(`http://localhost:8080/files/${owner}`)
                             console.error(error);
                         });
                 };
+            }else if(target.classList.contains("copy-folder")){
+                fetch(`/copy-folder/${fileId}`, { method: "POST" })
+                    .then(response => {
+                        if (!response.ok) throw new Error(`Error: ${response.status}`);
+                        return response.text();
+                    })
+                    .then(() => location.reload())
+                    .catch(console.error);
             }
         });
     });

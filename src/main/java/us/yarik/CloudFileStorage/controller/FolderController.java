@@ -1,5 +1,6 @@
 package us.yarik.CloudFileStorage.controller;
 
+import io.minio.errors.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,16 +11,19 @@ import us.yarik.CloudFileStorage.model.File;
 import us.yarik.CloudFileStorage.service.FileService;
 import us.yarik.CloudFileStorage.service.MinioService;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 //directory
 //TODO delete folder(dont delete files and folders on that folder)
-//TODO copy folder
 //TODO put folder to folder
 //TODO download folder?
 
@@ -169,6 +173,38 @@ public class FolderController {
         boolean isNameUnique = (file == null);
         System.out.println(isNameUnique);
         return ResponseEntity.ok().body(Map.of("isNameUnique", isNameUnique));
+    }
+    @PostMapping("/copy-folder/{fileId}")
+    public ResponseEntity<String> copyFolder(@PathVariable("fileId") String fileId) throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, XmlParserException, InvalidResponseException, InternalException {
+        File file = fileService.findById(fileId);
+        List<File> filesOnFolder = fileService.findByOwnerAndFileNameList(file.getOwner(), file.getFileName());
+        System.out.println(filesOnFolder.toString());
+        LocalDateTime now = LocalDateTime.now();
+        DateTimeFormatter myFormatObj = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
+        String formattedDate = myFormatObj.format(now);
+        FolderDTO folderDTO = new FolderDTO( file.getFileName() + " " + formattedDate, null, file.getOwner());
+        createFolder(folderDTO);
+        for(File files: filesOnFolder){
+            if(!filesOnFolder.isEmpty()) {
+                String uuid = UUID.randomUUID().toString();
+                String sanitizedFileName = files.getFileName().replaceAll("[<>:\"/\\|?*]", "_");
+                Path path = Paths.get("bucket" + java.io.File.separator + files.getOwner() + "-" + sanitizedFileName + "-" + uuid);
+
+                File fileCopy = new File();
+                fileCopy.setFileName(files.getFileName());
+                fileCopy.setFileType(files.getFileType());
+                fileCopy.setFileSize(files.getFileSize());
+                fileCopy.setUploadDate(LocalDateTime.now());
+                fileCopy.setOwner(files.getOwner());
+                fileCopy.setMinioPath(path.toString());
+                fileCopy.setUuid(uuid);
+                fileCopy.setParentId(folderDTO.getFolderName());
+                fileService.uploadFile(fileCopy);
+                InputStream inputStream = minioService.getFileFromFolder(files.getOwner(), files.getFileName(), files.getUuid(), files.getParentId());
+                minioService.addFile(files.getOwner(), fileCopy.getFileName(), inputStream, files.getFileType(), uuid, fileCopy.getParentId());
+            }
+        }
+        return ResponseEntity.ok("Folder copied!");
     }
 
 }
