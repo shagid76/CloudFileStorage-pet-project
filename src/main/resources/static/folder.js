@@ -156,7 +156,7 @@ fileList.addEventListener('click', event => {
         };
     } else if (target.classList.contains('download-file')) {
         const fileId = target.getAttribute('data-file-id');
-        const downloadUrl = `/download/${fileId}`;
+        const downloadUrl = `/download-from-folder/${fileId}`;
         window.location.href = downloadUrl;
     }else if(target.classList.contains('put-to-folder')){
         console.log(fileId)
@@ -307,3 +307,26 @@ document.getElementById("create-folder").addEventListener("click", async () =>{
         }
     };
 })
+$('#parentId').select2({
+    placeholder: "Search folders...",
+    allowClear: true,
+    ajax: {
+        url: `/all-folders/${owner}`,
+        dataType: 'json',
+        delay: 250,
+        data: function (params) {
+            return { q: params.term };
+        },
+        processResults: function (data) {
+            return {
+                results: data.map(function (file) {
+                    return {
+                        id: file.id,
+                        text: file.fileName
+                    };
+                })
+            };
+        },
+        cache: true
+    }
+});

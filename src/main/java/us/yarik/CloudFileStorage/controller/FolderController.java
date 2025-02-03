@@ -2,7 +2,10 @@ package us.yarik.CloudFileStorage.controller;
 
 import io.minio.errors.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -13,6 +16,8 @@ import us.yarik.CloudFileStorage.service.MinioService;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.InvalidKeyException;
@@ -28,11 +33,7 @@ import java.util.UUID;
 //TODO download folder?
 
 //TODO delete folder(red button)
-//TODO rename file on folder(folder page)
-//TODO copy file on folder(folder page)
 //TODO put to folder on folder(folder page)
-//TODO download on folder(folder page)
-//TODO delete files form folder(folder page)
 
 //TODO file finder
 @RestController
@@ -240,6 +241,17 @@ public class FolderController {
         minioService.renameFileInFolder(oldFileName, newFileName,
                 fileService.findById(fileId).getOwner(), fileService.findById(fileId).getUuid(), fileService.findById(fileId).getParentId());
         return ResponseEntity.ok("File rename successfully!");
+    }
+
+    @GetMapping("/download-from-folder/{fileId}")
+    public ResponseEntity<byte[]> downloadFile(@PathVariable String fileId) {
+        File file = fileService.findById(fileId);
+        ByteArrayResource fileDownload = minioService.downloadFile(file.getOwner() + "-" + file.getFileName() + "-" + file.getUuid() + "-" + file.getParentId());
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename*=UTF-8''" +
+                        URLEncoder.encode(file.getFileName().replace(" ", "_"), StandardCharsets.UTF_8))
+                .contentType(MediaType.valueOf(file.getFileType()))
+                .body(fileDownload.getByteArray());
     }
 
 }
