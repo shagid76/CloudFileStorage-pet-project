@@ -230,4 +230,16 @@ public class FolderController {
         minioService.addFile(file.getOwner(), file.getFileName(), inputStream, file.getFileType(), uuid, fileCopy.getParentId());
     }
 
+    @PostMapping("/rename-on-folder/{fileId}")
+    public ResponseEntity<String> renameFile(@PathVariable("fileId") String fileId,
+                                             @RequestBody Map<String, String> request) throws
+            IOException {
+        String newFileName = request.get("newFileName");
+        String oldFileName = fileService.findById(fileId).getFileName();
+        fileService.updateFileName(fileService.findById(fileId), newFileName);
+        minioService.renameFileInFolder(oldFileName, newFileName,
+                fileService.findById(fileId).getOwner(), fileService.findById(fileId).getUuid(), fileService.findById(fileId).getParentId());
+        return ResponseEntity.ok("File rename successfully!");
+    }
+
 }

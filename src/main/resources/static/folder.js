@@ -137,7 +137,7 @@ fileList.addEventListener('click', event => {
                 alert("File name cannot be empty!");
                 return;
             }
-            fetch(`/rename/${fileId}`, {
+            fetch(`/rename-on-folder/${fileId}`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ newFileName })
