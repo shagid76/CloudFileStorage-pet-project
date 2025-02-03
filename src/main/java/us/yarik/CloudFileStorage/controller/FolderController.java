@@ -207,4 +207,27 @@ public class FolderController {
         return ResponseEntity.ok("Folder copied!");
     }
 
+    @PostMapping("/copy-file-on-folder/{fileId}")
+    public void copyFile(@PathVariable("fileId") String fileId) throws IOException, ServerException,
+            InsufficientDataException, ErrorResponseException, NoSuchAlgorithmException, InvalidKeyException,
+            InvalidResponseException, XmlParserException, InternalException {
+        File file = fileService.findById(fileId);
+        String uuid = UUID.randomUUID().toString();
+        String sanitizedFileName = file.getFileName().replaceAll("[<>:\"/\\|?*]", "_");
+        Path path = Paths.get("bucket" + java.io.File.separator + file.getOwner() + "-" + sanitizedFileName + "-" + uuid);
+
+        File fileCopy = new File();
+        fileCopy.setFileName(file.getFileName());
+        fileCopy.setFileType(file.getFileType());
+        fileCopy.setFileSize(file.getFileSize());
+        fileCopy.setUploadDate(LocalDateTime.now());
+        fileCopy.setOwner(file.getOwner());
+        fileCopy.setMinioPath(path.toString());
+        fileCopy.setUuid(uuid);
+        fileCopy.setParentId(file.getParentId());
+        fileService.uploadFile(fileCopy);
+        InputStream inputStream = minioService.getFileFromFolder(file.getOwner(), file.getFileName(), file.getUuid(), file.getParentId());
+        minioService.addFile(file.getOwner(), file.getFileName(), inputStream, file.getFileType(), uuid, fileCopy.getParentId());
+    }
+
 }

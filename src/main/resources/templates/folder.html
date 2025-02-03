@@ -15,7 +15,24 @@
           <h3 class="text-center">Files</h3>
           <ul id="fileList" class="list-group"></ul>
 
-
+          <div id="modal-window" class="modal" style="display: none;">
+            <div class="modal-dialog">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title">Rename File</h5>
+                  <button type="button" class="btn-close" id="close-modal"
+                          aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                  <form method="post" id="rename-file-post">
+                    <label for="newFileName" class="form-label">Enter new file name:</label>
+                    <input type="text" id="newFileName" class="form-control" required/>
+                    <button class="btn btn-primary w-100 mt-3" type="submit">Rename</button>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
 
           <div id="modal-window-create-folder" class="modal" style="display: none;">
             <div class="modal-dialog">
@@ -35,6 +52,48 @@
               </div>
             </div>
           </div>
+
+          <div id="modal-window-put-to-folder" class="modal">
+            <div class="modal-dialog">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title">Select Folder</h5>
+                  <button type="button" class="btn-close" id="close-modal-put-to-folder" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                  <form id="put-to-folder-post">
+                    <label for="parentId" class="form-label">Folder name:</label>
+                    <select class="select2" id="parentId" name="name">
+                      <option value="" selected disabled>Folders...</option>
+                    </select>
+                    <button class="btn btn-primary w-100 mt-3" type="submit">Select</button>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+
+
+          <div id="modal-window-rename-folder" class="modal" style="display: none;">
+            <div class="modal-dialog">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title">Rename folder</h5>
+                  <button type="button" class="btn-close" id="close-modal-rename-folder"
+                          aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                  <form method="post" id="rename-folder-post">
+                    <label for="newFolderName" class="form-label">Enter folder name:</label>
+                    <input type="text" id="newFolderName" class="form-control" required/>
+                    <button class="btn btn-primary w-100 mt-3" type="submit">Rename</button>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+
+
 
 
 

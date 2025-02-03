@@ -110,6 +110,136 @@ fileList.addEventListener('click', event => {
             })
             .then(() => location.reload())
             .catch(console.error);
+    } else if (target.classList.contains('copy-file')) {
+        fetch(`/copy-file-on-folder/${fileId}`, { method: "POST" })
+            .then(response => {
+                if (!response.ok) throw new Error(`Error: ${response.status}`);
+                return response.text();
+            })
+            .then(() => location.reload())
+            .catch(console.error);
+    }
+    else if (target.classList.contains('rename-file')) {
+        const modal = document.getElementById("modal-window");
+        const closeModal = document.getElementById("close-modal");
+        const renameForm = document.getElementById("rename-file-post");
+        const newFileNameInput = document.getElementById("newFileName");
+
+        modal.style.display = "block";
+
+        closeModal.onclick = () => modal.style.display = "none";
+        window.onclick = event => { if (event.target === modal) modal.style.display = "none"; };
+
+        renameForm.onsubmit = event => {
+            event.preventDefault();
+            const newFileName = newFileNameInput.value.trim();
+            if (!newFileName) {
+                alert("File name cannot be empty!");
+                return;
+            }
+            fetch(`/rename/${fileId}`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ newFileName })
+            })
+                .then(response => {
+                    if (!response.ok) throw new Error(`Error: ${response.status}`);
+                    return response.text();
+                })
+                .then(() => {
+                    modal.style.display = "none";
+                    location.reload();
+                })
+                .catch(error => {
+                    console.error(error);
+                });
+        };
+    } else if (target.classList.contains('download-file')) {
+        const fileId = target.getAttribute('data-file-id');
+        const downloadUrl = `/download/${fileId}`;
+        window.location.href = downloadUrl;
+    }else if(target.classList.contains('put-to-folder')){
+        console.log(fileId)
+        const modal = document.getElementById("modal-window-put-to-folder");
+        const closeModal = document.getElementById("close-modal-put-to-folder");
+        const putForm = document.getElementById("put-to-folder-post");
+        const parentId = document.getElementById("parentId");
+        modal.style.display = "block";
+
+        closeModal.onclick = () => modal.style.display = "none";
+        window.onclick = event => { if (event.target === modal) modal.style.display = "none"; };
+
+        putForm.onsubmit = event => {
+            event.preventDefault();
+            const parentID = parentId.value.trim();
+            if (!parentID) {
+                alert("Folder name cannot be empty!");
+                return;
+            }
+            fetch(`/put-file-to-folder/${fileId}`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ parentID })
+            })
+                .then(response =>{
+                    if(!response.ok){
+                        throw new Error(`Error: ${response.status}`);
+                    }
+                    return response.text();
+                })
+                .then(data => {
+                    modal.style.display = "none";
+                    location.reload();
+                })
+                .catch(error =>{
+                    console.error(error);
+                })
+
+
+        };
+    }else if(target.classList.contains("rename-folder")){
+        const modal = document.getElementById("modal-window-rename-folder");
+        const closeModal = document.getElementById("close-modal-rename-folder");
+        const renameForm = document.getElementById("rename-folder-post");
+        const newFolderNameInput = document.getElementById("newFolderName");
+
+        modal.style.display = "block";
+
+        closeModal.onclick = () => modal.style.display = "none";
+        window.onclick = event => { if (event.target === modal) modal.style.display = "none"; };
+
+        renameForm.onsubmit = event => {
+            event.preventDefault();
+            const newFolderName = newFolderNameInput.value.trim();
+            if (!newFolderName) {
+                alert("Folder name cannot be empty!");
+                return;
+            }
+            fetch(`/rename-folder/${fileId}`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ newFolderName })
+            })
+                .then(response => {
+                    if (!response.ok) throw new Error(`Error: ${response.status}`);
+                    return response.text();
+                })
+                .then(() => {
+                    modal.style.display = "none";
+                    location.reload();
+                })
+                .catch(error => {
+                    console.error(error);
+                });
+        };
+    }else if(target.classList.contains("copy-folder")){
+        fetch(`/copy-folder/${fileId}`, { method: "POST" })
+            .then(response => {
+                if (!response.ok) throw new Error(`Error: ${response.status}`);
+                return response.text();
+            })
+            .then(() => location.reload())
+            .catch(console.error);
     }
 });
 
