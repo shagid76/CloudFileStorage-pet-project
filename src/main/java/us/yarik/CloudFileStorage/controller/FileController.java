@@ -40,7 +40,6 @@ public class FileController {
     }
 
 
-    //TODO fix - now method dont delete files on folder
     @DeleteMapping("/delete-directory/{owner}")
     public void deleteDirectory(@PathVariable("owner") String owner) throws Exception {
         minioService.deleteFilesByOwner(owner);
@@ -170,7 +169,13 @@ public class FileController {
         }
     }
 
-
-
+    @PostMapping("/put-folder-to-folder/{fileId}")
+    public ResponseEntity<String> putFolderToFolder(@PathVariable("fileId") String fileId, @RequestBody Map<String, String> request) {
+        String folderId = request.get("parentID");
+        String parentId = fileService.findById(folderId).getFileName();
+        File folder = fileService.findById(fileId);
+        fileService.putFolderToFolder(folder, parentId);
+        return ResponseEntity.ok("File putted successfully!");
+    }
 
 }

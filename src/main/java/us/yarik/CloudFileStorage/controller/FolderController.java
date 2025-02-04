@@ -38,6 +38,8 @@ import java.util.zip.ZipOutputStream;
 
 //TODO file finder(directory + folder)
 
+//TODO spring session
+
 //TODO rename methods 
 @RestController
 @RequiredArgsConstructor

@@ -252,6 +252,50 @@ fileList.addEventListener('click', event => {
         const fileId = target.getAttribute('data-file-id');
         const downloadUrl = `/download-folder/${fileId}`;
         window.location.href = downloadUrl;
+    }else if (target.classList.contains('put-folder-to-folder')) {
+        const modal = document.getElementById("modal-window-put-to-folder");
+        const closeModal = document.getElementById("close-modal-put-to-folder");
+        const putForm = document.getElementById("put-to-folder-post");
+        const parentId = document.getElementById("parentId");
+        modal.style.display = "block";
+
+        closeModal.onclick = () => modal.style.display = "none";
+        window.onclick = event => {
+            if (event.target === modal) modal.style.display = "none";
+        };
+
+        putForm.onsubmit = async event => {
+            event.preventDefault();
+            const parentID = parentId.value.trim();
+            if (!parentID) {
+                alert("Folder name cannot be empty!");
+                return;
+            }
+            if (parentID === fileId) {
+                alert("You cannot move a folder into itself!");
+                return;
+            }
+
+
+            fetch(`/put-folder-to-folder/${fileId}`, {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({parentID})
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`Error: ${response.status}`);
+                    }
+                    return response.text();
+                })
+                .then(data => {
+                    modal.style.display = "none";
+                    location.reload();
+                })
+                .catch(error => {
+                    console.error(error);
+                })
+        }
     }
 });
 
