@@ -9,11 +9,13 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 import us.yarik.CloudFileStorage.dto.FolderDTO;
 import us.yarik.CloudFileStorage.model.File;
 import us.yarik.CloudFileStorage.service.FileService;
 import us.yarik.CloudFileStorage.service.MinioService;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URLEncoder;
@@ -27,16 +29,14 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 //directory
-//TODO delete folder(dont delete files and folders on that folder)
 //TODO put folder to folder
-//TODO download folder?
 
-//TODO delete folder(dont delete files and folders on that folder)
 //TODO put to folder
-//TODO download folder?
 
-//TODO file finder
+//TODO file finder(directory + folder)
 
 //TODO rename methods 
 @RestController
@@ -290,6 +290,35 @@ public class FolderController {
         }
         fileService.deleteFile(folderName);
         return ResponseEntity.ok("Deleting successfully!");
+    }
+
+    @GetMapping("/download-folder/{fileId}")
+    public ResponseEntity<StreamingResponseBody> downloadFolder(@PathVariable String fileId) throws IOException {
+        File folder = fileService.findById(fileId);
+        List<File> files = fileService.findByParentIdAndOwner(folder.getFileName(), folder.getOwner());
+
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        ZipOutputStream zipOutputStream = new ZipOutputStream(byteArrayOutputStream);
+
+        for (File file : files) {
+            byte[] fileBytes = minioService.downloadFile(file.getOwner() + "-" + file.getFileName() + "-" + file.getUuid() + "-" + file.getParentId()).getByteArray();
+            ZipEntry zipEntry = new ZipEntry(file.getFileName().replace(" ", "_"));
+            zipOutputStream.putNextEntry(zipEntry);
+            zipOutputStream.write(fileBytes);
+            zipOutputStream.closeEntry();
+        }
+
+        zipOutputStream.close();
+
+        StreamingResponseBody responseBody = outputStream -> {
+            outputStream.write(byteArrayOutputStream.toByteArray());
+            outputStream.flush();
+        };
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename*=UTF-8''" + URLEncoder.encode(  folder.getFileName() + ".zip", StandardCharsets.UTF_8))
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .body(responseBody);
     }
 
 }

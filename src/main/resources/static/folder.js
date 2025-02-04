@@ -248,6 +248,10 @@ fileList.addEventListener('click', event => {
                 window.location.href = `/directory/${owner}`;
             })
             .catch(console.error);
+    }else if (target.classList.contains('download-folder')) {
+        const fileId = target.getAttribute('data-file-id');
+        const downloadUrl = `/download-folder/${fileId}`;
+        window.location.href = downloadUrl;
     }
 });
 

@@ -244,6 +244,10 @@ fetch(`http://localhost:8080/files/${owner}`)
                         window.location.href = `/directory/${owner}`;
                     })
                     .catch(console.error);
+            }else if (target.classList.contains('download-folder')) {
+                const fileId = target.getAttribute('data-file-id');
+                const downloadUrl = `/download-folder/${fileId}`;
+                window.location.href = downloadUrl;
             }
         });
     });
