@@ -32,10 +32,13 @@ import java.util.UUID;
 //TODO put folder to folder
 //TODO download folder?
 
-//TODO delete folder(red button)
-//TODO put to folder on folder(folder page)
+//TODO delete folder(dont delete files and folders on that folder)
+//TODO put to folder
+//TODO download folder?
 
 //TODO file finder
+
+//TODO rename methods 
 @RestController
 @RequiredArgsConstructor
 public class FolderController {
@@ -57,9 +60,9 @@ public class FolderController {
         return ResponseEntity.ok(folder);
     }
 
-    @GetMapping("/files/folder/{parentId}")
-    public List<File> allFilesFromFolder(@PathVariable("parentId") String parentId) {
-        return fileService.findByParentId(parentId);
+    @GetMapping("/files/folder/{parentId}/{owner}")
+    public List<File> allFilesFromFolder(@PathVariable("parentId") String parentId, @PathVariable("owner") String owner) {
+        return fileService.findByParentIdAndOwner(parentId, owner);
     }
 
 //    @GetMapping("/download/{fileId}/{folder}")
@@ -167,14 +170,16 @@ public class FolderController {
                     .body("Error " + e.getMessage());
         }
     }
+
     @GetMapping("/check-folder-name/{folderName}")
     public ResponseEntity<?> checkFolderName(@PathVariable("folderName") String folderName,
-                                             @RequestParam String owner){
-        File file = fileService.findByOwnerAndFileName(owner,  folderName);
+                                             @RequestParam String owner) {
+        File file = fileService.findByOwnerAndFileName(owner, folderName);
         boolean isNameUnique = (file == null);
         System.out.println(isNameUnique);
         return ResponseEntity.ok().body(Map.of("isNameUnique", isNameUnique));
     }
+
     @PostMapping("/copy-folder/{fileId}")
     public ResponseEntity<String> copyFolder(@PathVariable("fileId") String fileId) throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, XmlParserException, InvalidResponseException, InternalException {
         File file = fileService.findById(fileId);
@@ -183,10 +188,10 @@ public class FolderController {
         LocalDateTime now = LocalDateTime.now();
         DateTimeFormatter myFormatObj = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
         String formattedDate = myFormatObj.format(now);
-        FolderDTO folderDTO = new FolderDTO( file.getFileName() + " " + formattedDate, null, file.getOwner());
+        FolderDTO folderDTO = new FolderDTO(file.getFileName() + " " + formattedDate, null, file.getOwner());
         createFolder(folderDTO);
-        for(File files: filesOnFolder){
-            if(!filesOnFolder.isEmpty()) {
+        for (File files : filesOnFolder) {
+            if (!filesOnFolder.isEmpty()) {
                 String uuid = UUID.randomUUID().toString();
                 String sanitizedFileName = files.getFileName().replaceAll("[<>:\"/\\|?*]", "_");
                 Path path = Paths.get("bucket" + java.io.File.separator + files.getOwner() + "-" + sanitizedFileName + "-" + uuid);
@@ -252,6 +257,39 @@ public class FolderController {
                         URLEncoder.encode(file.getFileName().replace(" ", "_"), StandardCharsets.UTF_8))
                 .contentType(MediaType.valueOf(file.getFileType()))
                 .body(fileDownload.getByteArray());
+    }
+
+    @DeleteMapping("/delete-folder/{owner}/{parentId}")
+    public ResponseEntity<String> deleteFolder(@PathVariable("owner") String owner,
+                                               @PathVariable("parentId") String parentId) throws ServerException,
+            InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException,
+            InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
+        File folderName = fileService.findByOwnerAndFileName(owner, parentId);
+        List<File> filesONFolder = fileService.findByParentIdAndOwner(parentId, owner);
+        for (File fileDelete : filesONFolder) {
+            if (!filesONFolder.isEmpty()) {
+                fileService.deleteFile(fileDelete);
+                minioService.deleteFile(fileDelete.getOwner() + "-" + fileDelete.getFileName() + "-" + fileDelete.getUuid() + "-" + fileDelete.getParentId());
+            }
+        }
+        fileService.deleteFile(folderName);
+        return ResponseEntity.ok("Deleting successfully!");
+    }
+    @DeleteMapping("/delete-folder-by-id/{owner}/{fileId}")
+    public ResponseEntity<String> deleteFolderByFileId(@PathVariable("owner") String owner,
+                                               @PathVariable("fileId") String fileId) throws ServerException,
+            InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException,
+            InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
+        File folderName = fileService.findById(fileId);
+        List<File> filesONFolder = fileService.findByParentIdAndOwner(folderName.getFileName(), owner);
+        for (File fileDelete : filesONFolder) {
+            if (!filesONFolder.isEmpty()) {
+                fileService.deleteFile(fileDelete);
+                minioService.deleteFile(fileDelete.getOwner() + "-" + fileDelete.getFileName() + "-" + fileDelete.getUuid() + "-" + fileDelete.getParentId());
+            }
+        }
+        fileService.deleteFile(folderName);
+        return ResponseEntity.ok("Deleting successfully!");
     }
 
 }

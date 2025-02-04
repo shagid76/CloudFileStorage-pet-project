@@ -236,6 +236,14 @@ fetch(`http://localhost:8080/files/${owner}`)
                     })
                     .then(() => location.reload())
                     .catch(console.error);
+            }else if(target.classList.contains("delete-folder")) {
+
+                fetch(`/delete-folder-by-id/${owner}/${fileId}`, {method: "DELETE"})
+                    .then(response => {
+                        if (!response.ok) throw new Error(`Error: ${response.status}`);
+                        window.location.href = `/directory/${owner}`;
+                    })
+                    .catch(console.error);
             }
         });
     });

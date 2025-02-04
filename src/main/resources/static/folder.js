@@ -2,7 +2,7 @@ const urlParts = window.location.pathname.split('/');
 const parentId = urlParts[urlParts.length - 1];
 const owner = urlParts[urlParts.length - 2];
 
-fetch(`/files/folder/${parentId}`)
+fetch(`/files/folder/${parentId}/${owner}`)
     .then(response => {
         if (!response.ok) {
             throw new Error(`Error: ${response.status}`);
@@ -71,11 +71,11 @@ fetch(`/files/folder/${parentId}`)
                 </svg>
             </a>
             <ul class="dropdown-menu" aria-labelledby="dropdownMenuLink">
-                <li><a class="dropdown-item delete-file" href="#" data-file-id="${file.id}">Delete folder</a></li>
-                <li><a class="dropdown-item rename-file" href="#" data-file-id="${file.id}">Rename folder</a></li>
-                <li><a class="dropdown-item copy-file" href="#" data-file-id="${file.id}">Copy folder</a></li>
-                <li><a class="dropdown-item put-to-folder" href="#" data-file-id="${file.id}">Put to folder</a></li>
-                <li><a class="dropdown-item download-file" href="#" data-file-id="${file.id}">Download</a></li>
+                <li><a class="dropdown-item delete-folder" href="#" data-file-id="${file.id}">Delete folder</a></li>
+                <li><a class="dropdown-item rename-folder" href="#" data-file-id="${file.id}">Rename folder</a></li>
+                <li><a class="dropdown-item copy-folder" href="#" data-file-id="${file.id}">Copy folder</a></li>
+                <li><a class="dropdown-item put-folder-to-folder" href="#" data-file-id="${file.id}">Put to folder</a></li>
+                <li><a class="dropdown-item download-folder" href="#" data-file-id="${file.id}">Download</a></li>
             </ul>
         </div>
     </li>`
@@ -240,6 +240,14 @@ fileList.addEventListener('click', event => {
             })
             .then(() => location.reload())
             .catch(console.error);
+    } else if(target.classList.contains("delete-folder")) {
+
+        fetch(`/delete-folder-by-id/${owner}/${fileId}`, {method: "DELETE"})
+            .then(response => {
+                if (!response.ok) throw new Error(`Error: ${response.status}`);
+                window.location.href = `/directory/${owner}`;
+            })
+            .catch(console.error);
     }
 });
 
@@ -307,6 +315,19 @@ document.getElementById("create-folder").addEventListener("click", async () =>{
         }
     };
 })
+const deleteFolderForm = document.getElementById("delete-folder");
+if (deleteFolderForm) {
+    deleteFolderForm.addEventListener("submit", event => {
+        event.preventDefault();
+        fetch(`/delete-folder/${owner}/${parentId}`, { method: "DELETE" })
+            .then(response => {
+                if (!response.ok) throw new Error(`Error: ${response.status}`);
+                window.location.href = `/directory/${owner}`;
+            })
+            .catch(console.error);
+    });
+}
+
 $('#parentId').select2({
     placeholder: "Search folders...",
     allowClear: true,

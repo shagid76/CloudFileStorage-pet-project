@@ -54,8 +54,8 @@ public class FileService {
         return file.orElse(null);
      }
 
-     public List<File> findByParentId(String parentId){
-        return fileRepository.findByParentId(parentId);
+     public List<File> findByParentIdAndOwner(String parentId, String owner){
+        return fileRepository.findByParentIdAndOwner(parentId, owner);
      }
 
      public void putFileToFolder(String parentId, String fileId){
