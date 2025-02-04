@@ -143,7 +143,14 @@ public class FileController {
     public ResponseEntity<String> renameFolder(@PathVariable("fileId") String fileId,
                                              @RequestBody Map<String, String> request){
         String newFileName = request.get("newFolderName");
-        fileService.updateFileName(fileService.findById(fileId), newFileName);
+        File folder = fileService.findById(fileId);
+         List<File> files = fileService.findByParentIdAndOwner(folder.getFileName(), folder.getOwner());
+         for(File file: files){
+             if(!files.isEmpty()){
+                 fileService.setParentId(file, newFileName);
+             }
+         }
+        fileService.updateFileName(folder, newFileName);
         return ResponseEntity.ok("Folder rename successfully!");
     }
 
@@ -174,7 +181,7 @@ public class FileController {
         String folderId = request.get("parentID");
         String parentId = fileService.findById(folderId).getFileName();
         File folder = fileService.findById(fileId);
-        fileService.putFolderToFolder(folder, parentId);
+        fileService.setParentId(folder, parentId);
         return ResponseEntity.ok("File putted successfully!");
     }
 

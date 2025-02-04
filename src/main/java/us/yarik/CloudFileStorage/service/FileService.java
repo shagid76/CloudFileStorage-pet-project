@@ -80,7 +80,7 @@ public class FileService {
         return fileRepository.findAllByOwnerAndParentId(owner, fileName);
      }
 
-     public void putFolderToFolder(File folder, String parentId){
+     public void setParentId(File folder, String parentId){
              folder.setParentId(parentId);
              fileRepository.save(folder);
      }
