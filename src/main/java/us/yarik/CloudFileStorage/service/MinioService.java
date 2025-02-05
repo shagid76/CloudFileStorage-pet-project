@@ -181,23 +181,47 @@ public class MinioService {
         );
     }
 
-    public void uploadFileToFolder(String fullFileName, String parentId){
+    public void uploadFileToFolder(String owner, String fullFileName, String uuid ,String oldParentId, String parentId){
         try {
 
             CopySource copySource = CopySource.builder()
                     .bucket(bucketName)
-                    .object(fullFileName)
+                    .object(owner + "-" + fullFileName + "-" + uuid + "-" + oldParentId)
                     .build();
 
             minioClient.copyObject(
                     CopyObjectArgs.builder()
                             .bucket(bucketName)
-                            .object(fullFileName + "-" + parentId)
+                            .object( owner + "-" + fullFileName + "-" + uuid + "-" + parentId)
                             .source(copySource)
                             .build()
             );
 
-            deleteFile(fullFileName);
+            deleteFile(owner + "-" + fullFileName + "-" + uuid + "-" + oldParentId);
+        } catch (MinioException | IOException e) {
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        } catch (InvalidKeyException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    public void uploadFileToFolder(String owner, String fullFileName, String uuid, String parentId){
+        try {
+
+            CopySource copySource = CopySource.builder()
+                    .bucket(bucketName)
+                    .object(owner + "-" + fullFileName + "-" + uuid)
+                    .build();
+
+            minioClient.copyObject(
+                    CopyObjectArgs.builder()
+                            .bucket(bucketName)
+                            .object( owner + "-" + fullFileName + "-" + uuid + "-" + parentId)
+                            .source(copySource)
+                            .build()
+            );
+
+            deleteFile(owner + "-" + fullFileName + "-" + uuid);
         } catch (MinioException | IOException e) {
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException(e);

@@ -160,7 +160,7 @@ public class FileController {
         String parentId = fileService.findById(folderId).getFileName();
         File file = fileService.findById(fileId);
         fileService.putFileToFolder(parentId, fileId);
-        minioService.uploadFileToFolder(file.getOwner() + "-" + file.getFileName() + "-" + file.getUuid(),
+        minioService.uploadFileToFolder(file.getOwner(), file.getFileName(), file.getUuid(),
                 parentId);
         return ResponseEntity.ok("File putted successfully!");
     }

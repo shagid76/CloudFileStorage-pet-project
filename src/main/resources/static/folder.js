@@ -176,7 +176,7 @@ fileList.addEventListener('click', event => {
                 alert("Folder name cannot be empty!");
                 return;
             }
-            fetch(`/put-file-to-folder/${fileId}`, {
+            fetch(`/put-file-to-another-folder/${fileId}`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ parentID })
