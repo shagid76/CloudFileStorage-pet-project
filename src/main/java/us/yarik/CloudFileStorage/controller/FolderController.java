@@ -32,7 +32,6 @@ import java.util.UUID;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-//TODO delete all folders (recursion)
 //TODO file finder(directory + folder)
 
 //TODO spring session
@@ -142,9 +141,6 @@ public class FolderController {
                     InputStream inputStream = minioService.getFileFromFolder(files.getOwner(), files.getFileName(), files.getUuid(), files.getParentId());
                     minioService.addFile(files.getOwner(), fileCopy.getFileName(), inputStream, files.getFileType(), uuid, fileCopy.getParentId());
                 }else{
-                    //copyFolder
-                    //FolderDTO folderDTO1 = new FolderDTO(files.getFileName() + " " + formattedDate, folderDTO.getFolderName(), files.getOwner());
-                    //createFolder(folderDTO1);
                     copyFilesOnFolder(files, formattedDate, folderDTO);
                 }
             }
@@ -232,15 +228,18 @@ public class FolderController {
                                                @PathVariable("parentId") String parentId) throws ServerException,
             InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException,
             InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
-        File folderName = fileService.findByOwnerAndFileName(owner, parentId);
-        List<File> filesONFolder = fileService.findByParentIdAndOwner(parentId, owner);
+        File folder = fileService.findByOwnerAndFileName(owner, parentId);
+        List<File> filesONFolder = fileService.findByParentIdAndOwner(folder.getFileName(), owner);
         for (File fileDelete : filesONFolder) {
-            if (!filesONFolder.isEmpty()) {
+            if (!fileDelete.isFolder()) {
                 fileService.deleteFile(fileDelete);
                 minioService.deleteFile(fileDelete.getOwner() + "-" + fileDelete.getFileName() + "-" + fileDelete.getUuid() + "-" + fileDelete.getParentId());
             }
+            else{
+                deleteFilesFromFolder(fileDelete);
+            }
         }
-        fileService.deleteFile(folderName);
+        fileService.deleteFile(folder);
         return ResponseEntity.ok("Deleting successfully!");
     }
 
@@ -249,16 +248,33 @@ public class FolderController {
                                                        @PathVariable("fileId") String fileId) throws ServerException,
             InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException,
             InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
-        File folderName = fileService.findById(fileId);
-        List<File> filesONFolder = fileService.findByParentIdAndOwner(folderName.getFileName(), owner);
+        File folder = fileService.findById(fileId);
+        List<File> filesONFolder = fileService.findByParentIdAndOwner(folder.getFileName(), owner);
         for (File fileDelete : filesONFolder) {
-            if (!filesONFolder.isEmpty()) {
+            if (!fileDelete.isFolder()) {
                 fileService.deleteFile(fileDelete);
                 minioService.deleteFile(fileDelete.getOwner() + "-" + fileDelete.getFileName() + "-" + fileDelete.getUuid() + "-" + fileDelete.getParentId());
             }
+            else{
+                deleteFilesFromFolder(fileDelete);
+            }
         }
-        fileService.deleteFile(folderName);
+        fileService.deleteFile(folder);
         return ResponseEntity.ok("Deleting successfully!");
+    }
+    public void deleteFilesFromFolder(File folder) throws ServerException, InsufficientDataException,
+            ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException,
+            InvalidResponseException, XmlParserException, InternalException {
+        List<File> files = fileService.findByParentIdAndOwner(folder.getFileName(), folder.getOwner());
+        for(File file: files){
+            if(!file.isFolder()){
+                fileService.deleteFile(file);
+                minioService.deleteFile(file.getOwner() + "-" + file.getFileName() + "-" + file.getUuid() + "-" + file.getParentId());
+            }else{
+                deleteFilesFromFolder(file);
+            }
+        }
+        fileService.deleteFile(folder);
     }
 
     @GetMapping("/download-folder/{fileId}")

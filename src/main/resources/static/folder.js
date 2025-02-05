@@ -299,6 +299,18 @@ fileList.addEventListener('click', event => {
     }
 });
 
+const deleteFolderForm = document.getElementById("delete-folder");
+if (deleteFolderForm) {
+    deleteFolderForm.addEventListener("submit", event => {
+        event.preventDefault();
+        fetch(`/delete-folder/${owner}/${parentId}`, { method: "DELETE" })
+            .then(response => {
+                if (!response.ok) throw new Error(`Error: ${response.status}`);
+                window.location.href = `/directory/${owner}`;
+            })
+            .catch(console.error);
+    });
+}
 document.getElementById("back-to-directory").addEventListener("click", event => {
     const target = event.target;
     if (target.classList.contains("back-to-directory")) {
@@ -362,19 +374,9 @@ document.getElementById("create-folder").addEventListener("click", async () =>{
             console.error(error);
         }
     };
+
 })
-const deleteFolderForm = document.getElementById("delete-folder");
-if (deleteFolderForm) {
-    deleteFolderForm.addEventListener("submit", event => {
-        event.preventDefault();
-        fetch(`/delete-folder/${owner}/${parentId}`, { method: "DELETE" })
-            .then(response => {
-                if (!response.ok) throw new Error(`Error: ${response.status}`);
-                window.location.href = `/directory/${owner}`;
-            })
-            .catch(console.error);
-    });
-}
+
 
 $('#parentId').select2({
     placeholder: "Search folders...",
