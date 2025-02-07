@@ -24,7 +24,6 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
-        System.out.println("SecurityFilterChain инициализирован");
         return httpSecurity
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/login", "/registration", "/static/**", "/all")

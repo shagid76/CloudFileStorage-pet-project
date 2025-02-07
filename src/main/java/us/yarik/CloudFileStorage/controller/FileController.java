@@ -44,8 +44,9 @@ public class FileController {
     public void deleteDirectory(@PathVariable("owner") String owner) throws Exception {
         List<File> files = fileService.findByOwner(owner);
         for (File file : files) {
+            if(!file.isFolder()){
             minioService.deleteFile(file.getUuid());
-        }
+        }}
         fileService.deleteFilesByOwner(owner);
     }
 
@@ -54,7 +55,7 @@ public class FileController {
         return fileService.findAll();
     }
 
-    @PostMapping("/add-file/{owner}")
+    @PostMapping("/file/{owner}")
     public ResponseEntity<String> addFilePost(@PathVariable("owner") String owner,
                                               @RequestParam("file") MultipartFile file) {
         try {
@@ -153,7 +154,7 @@ public class FileController {
         return ResponseEntity.ok("File putted successfully!");
     }
 
-    @GetMapping("/all-folders/{owner}")
+    @GetMapping("/folders/{owner}")
     public ResponseEntity<List<File>> allFoldersByOwner(@PathVariable("owner") String owner) {
         try {
             List<File> folders = fileService.findByOwnerAndIsFolderIsTrue(owner);

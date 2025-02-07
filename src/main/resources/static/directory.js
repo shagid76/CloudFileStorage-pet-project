@@ -241,7 +241,7 @@ fetch(`http://localhost:8080/files/${owner}`)
                     .catch(console.error);
             } else if (target.classList.contains("delete-folder")) {
 
-                fetch(`/delete-folder-by-id/${owner}/${fileId}`, {method: "DELETE"})
+                fetch(`/folder/${owner}/${fileId}`, {method: "DELETE"})
                     .then(response => {
                         if (!response.ok) throw new Error(`Error: ${response.status}`);
                         window.location.href = `/directory/${owner}`;
@@ -346,7 +346,7 @@ document.getElementById("create-folder").addEventListener("click", async () => {
                 return;
             }
 
-            fetch(`/create-folder`, {
+            fetch(`/folder`, {
                 method: "POST",
                 headers: {"Content-Type": "application/json"},
                 body: JSON.stringify({
@@ -378,7 +378,7 @@ $('#parentId').select2({
     placeholder: "Search folders...",
     allowClear: true,
     ajax: {
-        url: `/all-folders/${owner}`,
+        url: `/folders/${owner}`,
         dataType: 'json',
         delay: 250,
         data: function (params) {

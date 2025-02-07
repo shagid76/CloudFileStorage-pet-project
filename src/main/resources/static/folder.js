@@ -233,7 +233,7 @@ fileList.addEventListener('click', event => {
                 });
         };
     }else if(target.classList.contains("copy-folder")){
-        fetch(`/copy-folder/${fileId}`, { method: "POST" })
+        fetch(`/copy-folder-on-folder/${fileId}`, { method: "POST" })
             .then(response => {
                 if (!response.ok) throw new Error(`Error: ${response.status}`);
                 return response.text();
@@ -242,10 +242,10 @@ fileList.addEventListener('click', event => {
             .catch(console.error);
     } else if(target.classList.contains("delete-folder")) {
 
-        fetch(`/delete-folder-by-id/${owner}/${fileId}`, {method: "DELETE"})
+        fetch(`/folder/${owner}/${fileId}`, {method: "DELETE"})
             .then(response => {
                 if (!response.ok) throw new Error(`Error: ${response.status}`);
-                window.location.href = `/directory/${owner}`;
+                window.location.href = `/folder/${owner}/${parentId}`;
             })
             .catch(console.error);
     }else if (target.classList.contains('download-folder')) {
@@ -382,7 +382,7 @@ $('#parentId').select2({
     placeholder: "Search folders...",
     allowClear: true,
     ajax: {
-        url: `/all-folders/${owner}`,
+        url: `/folders/${owner}`,
         dataType: 'json',
         delay: 250,
         data: function (params) {

@@ -20,8 +20,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
@@ -33,14 +31,13 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 
-//TODO rename methods
 @RestController
 @RequiredArgsConstructor
 public class FolderController {
     private final FileService fileService;
     private final MinioService minioService;
 
-    @PostMapping("/create-folder")
+    @PostMapping("/folder")
     public ResponseEntity<File> createFolder(@RequestBody FolderDTO folderDTO) {
         File folder = File.builder()
                 .fileName(folderDTO.getFolderName())
@@ -62,7 +59,7 @@ public class FolderController {
     }
 
 
-    @PostMapping("/add-file/{owner}/{parentId}")
+    @PostMapping("/file/{owner}/{parentId}")
     public ResponseEntity<String> addFileToFolder(@PathVariable("owner") String owner,
                                                   @PathVariable("parentId") String parentId,
                                                   @RequestParam("file") MultipartFile file) {
@@ -104,6 +101,7 @@ public class FolderController {
             InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException,
             InvalidKeyException, XmlParserException, InvalidResponseException, InternalException {
         File folder = fileService.findById(fileId);
+        System.out.println(folder.getFileName());
         List<File> filesOnFolder = fileService.findByOwnerAndFileNameList(folder.getOwner(),
                 folder.getFileName());
 
@@ -136,6 +134,45 @@ public class FolderController {
         }
         return ResponseEntity.ok("Folder copied!");
     }
+    @PostMapping("/copy-folder-on-folder/{fileId}")
+    public ResponseEntity<String> copyFolderOnFolder(@PathVariable("fileId") String fileId) throws ServerException,
+            InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException,
+            InvalidKeyException, XmlParserException, InvalidResponseException, InternalException {
+        File folder = fileService.findById(fileId);
+        System.out.println(folder.getFileName());
+        List<File> filesOnFolder = fileService.findByOwnerAndFileNameList(folder.getOwner(),
+                folder.getFileName());
+
+        LocalDateTime now = LocalDateTime.now();
+        DateTimeFormatter myFormatObj = DateTimeFormatter.ofPattern("dd-MM-yyyy-HH:mm:ss");
+        String formattedDate = myFormatObj.format(now);
+
+        FolderDTO folderDTO = new FolderDTO(folder.getFileName() + "-" + formattedDate,
+                folder.getParentId(), folder.getOwner());
+        createFolder(folderDTO);
+
+        for (File files : filesOnFolder) {
+            if (!files.isFolder()) {
+                String uuid = UUID.randomUUID().toString();
+
+                File fileCopy = new File();
+                fileCopy.setFileName(files.getFileName());
+                fileCopy.setFileType(files.getFileType());
+                fileCopy.setFileSize(files.getFileSize());
+                fileCopy.setUploadDate(LocalDateTime.now());
+                fileCopy.setOwner(files.getOwner());
+                fileCopy.setUuid(uuid);
+                fileCopy.setParentId(folderDTO.getFolderName());
+                fileService.uploadFile(fileCopy);
+                InputStream inputStream = minioService.getFile(files.getUuid());
+                minioService.addFile(inputStream, files.getFileType(), uuid);
+            } else {
+                copyFilesOnFolder(files, formattedDate, folderDTO);
+            }
+        }
+        return ResponseEntity.ok("Folder copied!");
+    }
+
 
     public void copyFilesOnFolder(File folder, String currentTime, FolderDTO currentFolder)
             throws ServerException, InsufficientDataException, ErrorResponseException, IOException,
@@ -189,7 +226,7 @@ public class FolderController {
 
     @PostMapping("/rename-on-folder/{fileId}")
     public ResponseEntity<String> renameFile(@PathVariable("fileId") String fileId,
-                                             @RequestBody Map<String, String> request){
+                                             @RequestBody Map<String, String> request) {
         String newFileName = request.get("newFileName");
         fileService.updateFileName(fileService.findById(fileId), newFileName);
         return ResponseEntity.ok("File rename successfully!");
@@ -217,7 +254,7 @@ public class FolderController {
         for (File fileDelete : filesONFolder) {
             if (!fileDelete.isFolder()) {
                 fileService.deleteFile(fileDelete);
-                minioService.deleteFile( fileDelete.getUuid());
+                minioService.deleteFile(fileDelete.getUuid());
             } else {
                 deleteFilesFromFolder(fileDelete);
             }
@@ -226,7 +263,7 @@ public class FolderController {
         return ResponseEntity.ok("Deleting successfully!");
     }
 
-    @DeleteMapping("/delete-folder-by-id/{owner}/{fileId}")
+    @DeleteMapping("/folder/{owner}/{fileId}")
     public ResponseEntity<String> deleteFolderByFileId(@PathVariable("owner") String owner,
                                                        @PathVariable("fileId") String fileId) throws ServerException,
             InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException,
