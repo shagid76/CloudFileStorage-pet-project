@@ -56,7 +56,8 @@ public class FolderController {
     }
 
     @GetMapping("/files/folder/{parentId}/{owner}")
-    public List<File> allFilesFromFolder(@PathVariable("parentId") String parentId, @PathVariable("owner") String owner) {
+    public List<File> allFilesFromFolder(@PathVariable("parentId") String parentId,
+                                         @PathVariable("owner") String owner) {
         return fileService.findByParentIdAndOwner(parentId, owner);
     }
 
@@ -71,7 +72,8 @@ public class FolderController {
             String sanitizedFileName = fileName.replaceAll("[<>:\"/\\|?*]", "_");
             InputStream inputStream = file.getInputStream();
             String contentType = file.getContentType();
-            Path path = Paths.get("bucket" + java.io.File.separator + owner + "-" + sanitizedFileName + "-" + uuid + "-" + parentId);
+            Path path = Paths.get("bucket" + java.io.File.separator + owner + "-" +
+                    sanitizedFileName + "-" + uuid + "-" + parentId);
 
             File newFile = File.builder()
                     .fileName(file.getOriginalFilename())
@@ -85,7 +87,7 @@ public class FolderController {
                     .build();
 
             fileService.uploadFile(newFile);
-            minioService.addFile(owner, fileName, inputStream, contentType, uuid, parentId);
+            minioService.addFile(inputStream, contentType, uuid);
 
             return ResponseEntity.ok("File uploaded successfully!");
         } catch (Exception e) {
@@ -99,7 +101,6 @@ public class FolderController {
                                              @RequestParam String owner) {
         File file = fileService.findByOwnerAndFileName(owner, folderName);
         boolean isNameUnique = (file == null);
-        System.out.println(isNameUnique);
         return ResponseEntity.ok().body(Map.of("isNameUnique", isNameUnique));
     }
 
@@ -108,22 +109,23 @@ public class FolderController {
             InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException,
             InvalidKeyException, XmlParserException, InvalidResponseException, InternalException {
         File folder = fileService.findById(fileId);
-        List<File> filesOnFolder = fileService.findByOwnerAndFileNameList(folder.getOwner(), folder.getFileName());
-        System.out.println(filesOnFolder.toString());
+        List<File> filesOnFolder = fileService.findByOwnerAndFileNameList(folder.getOwner(),
+                folder.getFileName());
 
         LocalDateTime now = LocalDateTime.now();
         DateTimeFormatter myFormatObj = DateTimeFormatter.ofPattern("dd-MM-yyyy-HH:mm:ss");
         String formattedDate = myFormatObj.format(now);
 
-        FolderDTO folderDTO = new FolderDTO(folder.getFileName() + "-" + formattedDate, null, folder.getOwner());
+        FolderDTO folderDTO = new FolderDTO(folder.getFileName() + "-" + formattedDate,
+                null, folder.getOwner());
         createFolder(folderDTO);
 
         for (File files : filesOnFolder) {
             if (!files.isFolder()) {
-                //copyFile
                 String uuid = UUID.randomUUID().toString();
                 String sanitizedFileName = files.getFileName().replaceAll("[<>:\"/\\|?*]", "_");
-                Path path = Paths.get("bucket" + java.io.File.separator + files.getOwner() + "-" + sanitizedFileName + "-" + uuid);
+                Path path = Paths.get("bucket" + java.io.File.separator + files.getOwner() + "-" +
+                        sanitizedFileName + "-" + uuid);
 
                 File fileCopy = new File();
                 fileCopy.setFileName(files.getFileName());
@@ -135,8 +137,8 @@ public class FolderController {
                 fileCopy.setUuid(uuid);
                 fileCopy.setParentId(folderDTO.getFolderName());
                 fileService.uploadFile(fileCopy);
-                InputStream inputStream = minioService.getFileFromFolder(files.getOwner(), files.getFileName(), files.getUuid(), files.getParentId());
-                minioService.addFile(files.getOwner(), fileCopy.getFileName(), inputStream, files.getFileType(), uuid, fileCopy.getParentId());
+                InputStream inputStream = minioService.getFile(files.getUuid());
+                minioService.addFile(inputStream, files.getFileType(), uuid);
             } else {
                 copyFilesOnFolder(files, formattedDate, folderDTO);
             }
@@ -144,8 +146,12 @@ public class FolderController {
         return ResponseEntity.ok("Folder copied!");
     }
 
-    public void copyFilesOnFolder(File folder, String currentTime, FolderDTO currentFolder) throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, XmlParserException, InvalidResponseException, InternalException {
-        FolderDTO folderDTO = new FolderDTO(folder.getFileName() + "-" + currentTime, currentFolder.getFolderName(), folder.getOwner());
+    public void copyFilesOnFolder(File folder, String currentTime, FolderDTO currentFolder)
+            throws ServerException, InsufficientDataException, ErrorResponseException, IOException,
+            NoSuchAlgorithmException, InvalidKeyException, XmlParserException, InvalidResponseException,
+            InternalException {
+        FolderDTO folderDTO = new FolderDTO(folder.getFileName() + "-" + currentTime,
+                currentFolder.getFolderName(), folder.getOwner());
         createFolder(folderDTO);
         List<File> files = fileService.findByParentIdAndOwner(folder.getFileName(), folder.getOwner());
         System.out.println(files.toString());
@@ -153,7 +159,8 @@ public class FolderController {
             if (!file.isFolder()) {
                 String uuid = UUID.randomUUID().toString();
                 String sanitizedFileName = file.getFileName().replaceAll("[<>:\"/\\|?*]", "_");
-                Path path = Paths.get("bucket" + java.io.File.separator + file.getOwner() + "-" + sanitizedFileName + "-" + uuid);
+                Path path = Paths.get("bucket" + java.io.File.separator + file.getOwner() + "-" +
+                        sanitizedFileName + "-" + uuid);
 
                 File fileCopy = new File();
                 fileCopy.setFileName(file.getFileName());
@@ -165,8 +172,8 @@ public class FolderController {
                 fileCopy.setUuid(uuid);
                 fileCopy.setParentId(folderDTO.getFolderName());
                 fileService.uploadFile(fileCopy);
-                InputStream inputStream = minioService.getFileFromFolder(file.getOwner(), file.getFileName(), file.getUuid(), file.getParentId());
-                minioService.addFile(file.getOwner(), fileCopy.getFileName(), inputStream, file.getFileType(), uuid, fileCopy.getParentId());
+                InputStream inputStream = minioService.getFile(file.getUuid());
+                minioService.addFile(inputStream, file.getFileType(), uuid);
             } else {
                 copyFilesOnFolder(file, currentTime, folderDTO);
             }
@@ -180,7 +187,8 @@ public class FolderController {
         File file = fileService.findById(fileId);
         String uuid = UUID.randomUUID().toString();
         String sanitizedFileName = file.getFileName().replaceAll("[<>:\"/\\|?*]", "_");
-        Path path = Paths.get("bucket" + java.io.File.separator + file.getOwner() + "-" + sanitizedFileName + "-" + uuid);
+        Path path = Paths.get("bucket" + java.io.File.separator + file.getOwner() + "-" +
+                sanitizedFileName + "-" + uuid);
 
         File fileCopy = new File();
         fileCopy.setFileName(file.getFileName());
@@ -192,29 +200,26 @@ public class FolderController {
         fileCopy.setUuid(uuid);
         fileCopy.setParentId(file.getParentId());
         fileService.uploadFile(fileCopy);
-        InputStream inputStream = minioService.getFileFromFolder(file.getOwner(), file.getFileName(), file.getUuid(), file.getParentId());
-        minioService.addFile(file.getOwner(), file.getFileName(), inputStream, file.getFileType(), uuid, fileCopy.getParentId());
+        InputStream inputStream = minioService.getFile(file.getUuid());
+        minioService.addFile(inputStream, file.getFileType(), uuid);
     }
 
     @PostMapping("/rename-on-folder/{fileId}")
     public ResponseEntity<String> renameFile(@PathVariable("fileId") String fileId,
-                                             @RequestBody Map<String, String> request) throws
-            IOException {
+                                             @RequestBody Map<String, String> request){
         String newFileName = request.get("newFileName");
-        String oldFileName = fileService.findById(fileId).getFileName();
         fileService.updateFileName(fileService.findById(fileId), newFileName);
-        minioService.renameFileInFolder(oldFileName, newFileName,
-                fileService.findById(fileId).getOwner(), fileService.findById(fileId).getUuid(), fileService.findById(fileId).getParentId());
         return ResponseEntity.ok("File rename successfully!");
     }
 
     @GetMapping("/download-from-folder/{fileId}")
     public ResponseEntity<byte[]> downloadFile(@PathVariable String fileId) {
         File file = fileService.findById(fileId);
-        ByteArrayResource fileDownload = minioService.downloadFile(file.getOwner() + "-" + file.getFileName() + "-" + file.getUuid() + "-" + file.getParentId());
+        ByteArrayResource fileDownload = minioService.downloadFile(file.getUuid());
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename*=UTF-8''" +
-                        URLEncoder.encode(file.getFileName().replace(" ", "_"), StandardCharsets.UTF_8))
+                        URLEncoder.encode(file.getFileName().replace(" ", "_"),
+                                StandardCharsets.UTF_8))
                 .contentType(MediaType.valueOf(file.getFileType()))
                 .body(fileDownload.getByteArray());
     }
@@ -229,7 +234,7 @@ public class FolderController {
         for (File fileDelete : filesONFolder) {
             if (!fileDelete.isFolder()) {
                 fileService.deleteFile(fileDelete);
-                minioService.deleteFile(fileDelete.getOwner() + "-" + fileDelete.getFileName() + "-" + fileDelete.getUuid() + "-" + fileDelete.getParentId());
+                minioService.deleteFile( fileDelete.getUuid());
             } else {
                 deleteFilesFromFolder(fileDelete);
             }
@@ -248,7 +253,7 @@ public class FolderController {
         for (File fileDelete : filesONFolder) {
             if (!fileDelete.isFolder()) {
                 fileService.deleteFile(fileDelete);
-                minioService.deleteFile(fileDelete.getOwner() + "-" + fileDelete.getFileName() + "-" + fileDelete.getUuid() + "-" + fileDelete.getParentId());
+                minioService.deleteFile(fileDelete.getUuid());
             } else {
                 deleteFilesFromFolder(fileDelete);
             }
@@ -264,7 +269,7 @@ public class FolderController {
         for (File file : files) {
             if (!file.isFolder()) {
                 fileService.deleteFile(file);
-                minioService.deleteFile(file.getOwner() + "-" + file.getFileName() + "-" + file.getUuid() + "-" + file.getParentId());
+                minioService.deleteFile(file.getUuid());
             } else {
                 deleteFilesFromFolder(file);
             }
@@ -281,7 +286,7 @@ public class FolderController {
         ZipOutputStream zipOutputStream = new ZipOutputStream(byteArrayOutputStream);
 
         for (File file : files) {
-            byte[] fileBytes = minioService.downloadFile(file.getOwner() + "-" + file.getFileName() + "-" + file.getUuid() + "-" + file.getParentId()).getByteArray();
+            byte[] fileBytes = minioService.downloadFile(file.getUuid()).getByteArray();
             ZipEntry zipEntry = new ZipEntry(file.getFileName().replace(" ", "_"));
             zipOutputStream.putNextEntry(zipEntry);
             zipOutputStream.write(fileBytes);
@@ -302,13 +307,11 @@ public class FolderController {
     }
 
     @PostMapping("/put-file-to-another-folder/{fileId}")
-    public ResponseEntity<String> putFileToFolder(@PathVariable("fileId") String fileId, @RequestBody Map<String, String> request) {
+    public ResponseEntity<String> putFileToFolder(@PathVariable("fileId") String fileId,
+                                                  @RequestBody Map<String, String> request) {
         String folderId = request.get("parentID");
         String parentId = fileService.findById(folderId).getFileName();
-        File file = fileService.findById(fileId);
         fileService.putFileToFolder(parentId, fileId);
-        minioService.uploadFileToFolder(file.getOwner(), file.getFileName(), file.getUuid(), file.getParentId(),
-                parentId);
         return ResponseEntity.ok("File putted successfully!");
     }
 

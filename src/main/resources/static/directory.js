@@ -303,7 +303,7 @@ const deleteDirectoryForm = document.getElementById("delete-directory");
 if (deleteDirectoryForm) {
     deleteDirectoryForm.addEventListener("submit", event => {
         event.preventDefault();
-        fetch(`http://localhost:8080/delete-directory/${owner}`, {method: "DELETE"})
+        fetch(`/delete-directory/${owner}`, {method: "DELETE"})
             .then(response => {
                 if (!response.ok) throw new Error(`Error: ${response.status}`);
                 window.location.href = `/directory/${owner}`;

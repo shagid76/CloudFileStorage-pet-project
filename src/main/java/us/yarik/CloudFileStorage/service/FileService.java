@@ -42,47 +42,45 @@ public class FileService {
         file.setFileName(fileName);
         fileRepository.save(file);
     }
-    public void deleteFilesByOwner(String owner){
+
+    public void deleteFilesByOwner(String owner) {
         fileRepository.deleteByOwner(owner);
     }
 
-    public File findById(String id){
+    public File findById(String id) {
         Optional<File> file = fileRepository.findById(id);
-        if(file.isPresent()){
+        if (file.isPresent()) {
             return file.get();
         }
         return file.orElse(null);
-     }
+    }
 
-     public List<File> findByParentIdAndOwner(String parentId, String owner){
+    public List<File> findByParentIdAndOwner(String parentId, String owner) {
         return fileRepository.findByParentIdAndOwner(parentId, owner);
-     }
+    }
 
-     public void putFileToFolder(String parentId, String fileId){
+    public void putFileToFolder(String parentId, String fileId) {
         File file = findById(fileId);
         file.setParentId(parentId);
         file.setMinioPath(file.getMinioPath() + "-" + parentId);
         fileRepository.save(file);
-     }
-     public List<File> findByOwnerAndIsFolderIsTrue(String owner){
+    }
+
+    public List<File> findByOwnerAndIsFolderIsTrue(String owner) {
         return fileRepository.findByOwnerAndIsFolderIsTrue(owner);
-     }
+    }
 
-     public File findByOwnerAndParentIdAndFileName(String owner, String parentId, String fileName){
-        Optional<File> file = fileRepository.findByOwnerAndParentIdAndFileName(owner, parentId, fileName);
-        if(file.isPresent()){
-            return file.get();
-        }
-        return file.orElse(null);
-     }
-
-     public List<File> findByOwnerAndFileNameList(String owner, String fileName){
+    public List<File> findByOwnerAndFileNameList(String owner, String fileName) {
         return fileRepository.findAllByOwnerAndParentId(owner, fileName);
-     }
+    }
 
-     public void setParentId(File folder, String parentId){
-             folder.setParentId(parentId);
-             fileRepository.save(folder);
-     }
+    public void setParentId(File folder, String parentId) {
+        folder.setParentId(parentId);
+        fileRepository.save(folder);
+    }
+
+    public List<File> findByOwner(String owner) {
+        return fileRepository.findByOwner(owner);
+    }
 
 }
