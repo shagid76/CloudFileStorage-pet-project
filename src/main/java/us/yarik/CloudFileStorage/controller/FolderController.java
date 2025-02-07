@@ -68,12 +68,8 @@ public class FolderController {
                                                   @RequestParam("file") MultipartFile file) {
         try {
             String uuid = UUID.randomUUID().toString();
-            String fileName = file.getOriginalFilename();
-            String sanitizedFileName = fileName.replaceAll("[<>:\"/\\|?*]", "_");
             InputStream inputStream = file.getInputStream();
             String contentType = file.getContentType();
-            Path path = Paths.get("bucket" + java.io.File.separator + owner + "-" +
-                    sanitizedFileName + "-" + uuid + "-" + parentId);
 
             File newFile = File.builder()
                     .fileName(file.getOriginalFilename())
@@ -81,7 +77,6 @@ public class FolderController {
                     .fileType(file.getContentType())
                     .uploadDate(LocalDateTime.now())
                     .owner(owner)
-                    .minioPath(path.toString())
                     .uuid(uuid)
                     .parentId(parentId)
                     .build();
@@ -123,9 +118,6 @@ public class FolderController {
         for (File files : filesOnFolder) {
             if (!files.isFolder()) {
                 String uuid = UUID.randomUUID().toString();
-                String sanitizedFileName = files.getFileName().replaceAll("[<>:\"/\\|?*]", "_");
-                Path path = Paths.get("bucket" + java.io.File.separator + files.getOwner() + "-" +
-                        sanitizedFileName + "-" + uuid);
 
                 File fileCopy = new File();
                 fileCopy.setFileName(files.getFileName());
@@ -133,7 +125,6 @@ public class FolderController {
                 fileCopy.setFileSize(files.getFileSize());
                 fileCopy.setUploadDate(LocalDateTime.now());
                 fileCopy.setOwner(files.getOwner());
-                fileCopy.setMinioPath(path.toString());
                 fileCopy.setUuid(uuid);
                 fileCopy.setParentId(folderDTO.getFolderName());
                 fileService.uploadFile(fileCopy);
@@ -158,9 +149,6 @@ public class FolderController {
         for (File file : files) {
             if (!file.isFolder()) {
                 String uuid = UUID.randomUUID().toString();
-                String sanitizedFileName = file.getFileName().replaceAll("[<>:\"/\\|?*]", "_");
-                Path path = Paths.get("bucket" + java.io.File.separator + file.getOwner() + "-" +
-                        sanitizedFileName + "-" + uuid);
 
                 File fileCopy = new File();
                 fileCopy.setFileName(file.getFileName());
@@ -168,7 +156,6 @@ public class FolderController {
                 fileCopy.setFileSize(file.getFileSize());
                 fileCopy.setUploadDate(LocalDateTime.now());
                 fileCopy.setOwner(file.getOwner());
-                fileCopy.setMinioPath(path.toString());
                 fileCopy.setUuid(uuid);
                 fileCopy.setParentId(folderDTO.getFolderName());
                 fileService.uploadFile(fileCopy);
@@ -186,9 +173,6 @@ public class FolderController {
             InvalidResponseException, XmlParserException, InternalException {
         File file = fileService.findById(fileId);
         String uuid = UUID.randomUUID().toString();
-        String sanitizedFileName = file.getFileName().replaceAll("[<>:\"/\\|?*]", "_");
-        Path path = Paths.get("bucket" + java.io.File.separator + file.getOwner() + "-" +
-                sanitizedFileName + "-" + uuid);
 
         File fileCopy = new File();
         fileCopy.setFileName(file.getFileName());
@@ -196,7 +180,6 @@ public class FolderController {
         fileCopy.setFileSize(file.getFileSize());
         fileCopy.setUploadDate(LocalDateTime.now());
         fileCopy.setOwner(file.getOwner());
-        fileCopy.setMinioPath(path.toString());
         fileCopy.setUuid(uuid);
         fileCopy.setParentId(file.getParentId());
         fileService.uploadFile(fileCopy);

@@ -22,7 +22,6 @@ public class File {
     private Long fileSize;
     private String fileType;
     private LocalDateTime uploadDate;
-    private String minioPath;
     private String owner;
     private String uuid;
 

@@ -59,12 +59,8 @@ public class FileController {
                                               @RequestParam("file") MultipartFile file) {
         try {
             String uuid = UUID.randomUUID().toString();
-            String fileName = file.getOriginalFilename();
-            String sanitizedFileName = fileName.replaceAll("[<>:\"/\\|?*]", "_");
             InputStream inputStream = file.getInputStream();
             String contentType = file.getContentType();
-            Path path = Paths.get("bucket" + java.io.File.separator + owner + "-" +
-                    sanitizedFileName + "-" + uuid);
 
 
             File uploadFile = new File();
@@ -72,7 +68,6 @@ public class FileController {
             uploadFile.setFileSize(file.getSize());
             uploadFile.setFileType(file.getContentType());
             uploadFile.setUploadDate(LocalDateTime.now());
-            uploadFile.setMinioPath(path.toString());
             uploadFile.setOwner(owner);
             uploadFile.setUuid(uuid);
             fileService.uploadFile(uploadFile);
@@ -113,9 +108,6 @@ public class FileController {
             InvalidResponseException, XmlParserException, InternalException {
         File file = fileService.findById(fileId);
         String uuid = UUID.randomUUID().toString();
-        String sanitizedFileName = file.getFileName().replaceAll("[<>:\"/\\|?*]", "_");
-        Path path = Paths.get("bucket" + java.io.File.separator + file.getOwner() + "-" +
-                sanitizedFileName + "-" + uuid);
 
         File fileCopy = new File();
         fileCopy.setFileName(file.getFileName());
@@ -123,7 +115,6 @@ public class FileController {
         fileCopy.setFileSize(file.getFileSize());
         fileCopy.setUploadDate(LocalDateTime.now());
         fileCopy.setOwner(file.getOwner());
-        fileCopy.setMinioPath(path.toString());
         fileCopy.setUuid(uuid);
         fileService.uploadFile(fileCopy);
         InputStream inputStream = minioService.getFile(file.getUuid());

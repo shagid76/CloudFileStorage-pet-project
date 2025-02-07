@@ -62,7 +62,6 @@ public class FileService {
     public void putFileToFolder(String parentId, String fileId) {
         File file = findById(fileId);
         file.setParentId(parentId);
-        file.setMinioPath(file.getMinioPath() + "-" + parentId);
         fileRepository.save(file);
     }
 
