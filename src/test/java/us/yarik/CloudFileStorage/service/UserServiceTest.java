@@ -6,6 +6,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import us.yarik.CloudFileStorage.advice.ConflictException;
 import us.yarik.CloudFileStorage.model.User;
 import us.yarik.CloudFileStorage.repository.UserRepository;
 
@@ -59,7 +60,7 @@ public class UserServiceTest {
         assertThatThrownBy(() -> {
             userService.registerCheck(USER);
         })
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(ConflictException.class)
                 .hasMessage("Email already exist.");
     }
 
@@ -67,8 +68,9 @@ public class UserServiceTest {
     void findByEmail_shouldReturnUserIfExist() {
         when(userRepository.findByEmail(USER.getEmail()))
                 .thenReturn(Optional.of(USER));
-        Optional<User> user = userRepository.findByEmail(USER.getEmail());
+        Optional<User> user = userService.findByEmail(USER.getEmail());
         assertTrue(user.isPresent());
+        assertEquals(USER, user.get());
     }
 
     @Test

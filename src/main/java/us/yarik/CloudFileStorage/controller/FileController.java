@@ -94,9 +94,7 @@ public class FileController {
     }
 
     @DeleteMapping("/delete/{fileId}")
-    public void deleteFile(@PathVariable("fileId") String fileId) throws ServerException,
-            InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException,
-            InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
+    public void deleteFile(@PathVariable("fileId") String fileId) throws Exception{
         File file = fileService.findById(fileId);
         minioService.deleteFile(file.getUuid());
         fileService.deleteFile(file);
@@ -104,9 +102,7 @@ public class FileController {
 
 
     @PostMapping("/copy/{fileId}")
-    public void copyFile(@PathVariable("fileId") String fileId) throws IOException, ServerException,
-            InsufficientDataException, ErrorResponseException, NoSuchAlgorithmException, InvalidKeyException,
-            InvalidResponseException, XmlParserException, InternalException {
+    public void copyFile(@PathVariable("fileId") String fileId) throws Exception{
         File file = fileService.findById(fileId);
         String uuid = UUID.randomUUID().toString();
 
@@ -124,7 +120,7 @@ public class FileController {
 
     @PostMapping("/rename/{fileId}")
     public ResponseEntity<String> renameFile(@PathVariable("fileId") String fileId,
-                                             @RequestBody Map<String, String> request) {
+                                             @RequestBody Map<String, String> request) throws  Exception{
         String newFileName = request.get("newFileName");
         fileService.updateFileName(fileService.findById(fileId), newFileName);
         return ResponseEntity.ok("File rename successfully!");
@@ -132,7 +128,7 @@ public class FileController {
 
     @PostMapping("/rename-folder/{fileId}")
     public ResponseEntity<String> renameFolder(@PathVariable("fileId") String fileId,
-                                               @RequestBody Map<String, String> request) {
+                                               @RequestBody Map<String, String> request) throws Exception {
         String newFileName = request.get("newFolderName");
         File folder = fileService.findById(fileId);
         List<File> files = fileService.findByParentIdAndOwner(folder.getFileName(), folder.getOwner());
@@ -147,7 +143,7 @@ public class FileController {
 
     @PostMapping("/put-file-to-folder/{fileId}")
     public ResponseEntity<String> putFileToFolder(@PathVariable("fileId") String fileId,
-                                                  @RequestBody Map<String, String> request) {
+                                                  @RequestBody Map<String, String> request) throws  Exception{
         String folderId = request.get("parentID");
         String parentId = fileService.findById(folderId).getFileName();
         fileService.putFileToFolder(parentId, fileId);
@@ -167,7 +163,7 @@ public class FileController {
 
     @PostMapping("/put-folder-to-folder/{fileId}")
     public ResponseEntity<String> putFolderToFolder(@PathVariable("fileId") String fileId,
-                                                    @RequestBody Map<String, String> request) {
+                                                    @RequestBody Map<String, String> request) throws Exception {
         String folderId = request.get("parentID");
         String parentId = fileService.findById(folderId).getFileName();
         File folder = fileService.findById(fileId);

@@ -17,7 +17,10 @@ public class FileService {
         return fileRepository.findAll();
     }
 
-    public File uploadFile(File file) {
+    public File uploadFile(File file) throws Exception {
+        if (file == null) {
+            throw new Exception("You can't upload null file!");
+        }
         return fileRepository.save(file);
     }
 
@@ -26,7 +29,10 @@ public class FileService {
     }
 
 
-    public void deleteFile(File file) {
+    public void deleteFile(File file) throws Exception {
+        if (file == null) {
+            throw new Exception("You can't delete null file!");
+        }
         fileRepository.delete(file);
     }
 
@@ -38,12 +44,18 @@ public class FileService {
         return file.orElse(null);
     }
 
-    public void updateFileName(File file, String fileName) {
+    public void updateFileName(File file, String fileName) throws Exception {
+        if (fileName.isEmpty() || fileName == null) {
+            throw new Exception("File name can't be null!");
+        }
         file.setFileName(fileName);
         fileRepository.save(file);
     }
 
-    public void deleteFilesByOwner(String owner) {
+    public void deleteFilesByOwner(String owner) throws Exception {
+        if (owner.isEmpty() || owner == null) {
+            throw new Exception("Owner can't be null!");
+        }
         fileRepository.deleteByOwner(owner);
     }
 
@@ -59,8 +71,11 @@ public class FileService {
         return fileRepository.findByParentIdAndOwner(parentId, owner);
     }
 
-    public void putFileToFolder(String parentId, String fileId) {
+    public void putFileToFolder(String parentId, String fileId) throws Exception{
         File file = findById(fileId);
+        if(parentId == null || parentId.isEmpty()){
+            throw new Exception("ParentId can't be null!");
+        }
         file.setParentId(parentId);
         fileRepository.save(file);
     }
@@ -73,12 +88,18 @@ public class FileService {
         return fileRepository.findAllByOwnerAndParentId(owner, fileName);
     }
 
-    public void setParentId(File folder, String parentId) {
+    public void setParentId(File folder, String parentId) throws Exception {
+        if (parentId.isEmpty() || parentId == null) {
+            throw new Exception("ParentId can't be null!");
+        }
         folder.setParentId(parentId);
         fileRepository.save(folder);
     }
 
-    public List<File> findByOwner(String owner) {
+    public List<File> findByOwner(String owner) throws Exception{
+        if(owner.isEmpty() || owner == null){
+            throw new Exception("Owner can't be null!");
+        }
         return fileRepository.findByOwner(owner);
     }
 

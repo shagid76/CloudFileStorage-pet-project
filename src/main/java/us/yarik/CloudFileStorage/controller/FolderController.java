@@ -38,7 +38,7 @@ public class FolderController {
     private final MinioService minioService;
 
     @PostMapping("/folder")
-    public ResponseEntity<File> createFolder(@RequestBody FolderDTO folderDTO) {
+    public ResponseEntity<File> createFolder(@RequestBody FolderDTO folderDTO) throws Exception {
         File folder = File.builder()
                 .fileName(folderDTO.getFolderName())
                 .isFolder(true)
@@ -97,9 +97,7 @@ public class FolderController {
     }
 
     @PostMapping("/copy-folder/{fileId}")
-    public ResponseEntity<String> copyFolder(@PathVariable("fileId") String fileId) throws ServerException,
-            InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException,
-            InvalidKeyException, XmlParserException, InvalidResponseException, InternalException {
+    public ResponseEntity<String> copyFolder(@PathVariable("fileId") String fileId) throws Exception{
         File folder = fileService.findById(fileId);
         System.out.println(folder.getFileName());
         List<File> filesOnFolder = fileService.findByOwnerAndFileNameList(folder.getOwner(),
@@ -135,9 +133,7 @@ public class FolderController {
         return ResponseEntity.ok("Folder copied!");
     }
     @PostMapping("/copy-folder-on-folder/{fileId}")
-    public ResponseEntity<String> copyFolderOnFolder(@PathVariable("fileId") String fileId) throws ServerException,
-            InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException,
-            InvalidKeyException, XmlParserException, InvalidResponseException, InternalException {
+    public ResponseEntity<String> copyFolderOnFolder(@PathVariable("fileId") String fileId) throws Exception {
         File folder = fileService.findById(fileId);
         System.out.println(folder.getFileName());
         List<File> filesOnFolder = fileService.findByOwnerAndFileNameList(folder.getOwner(),
@@ -175,9 +171,7 @@ public class FolderController {
 
 
     public void copyFilesOnFolder(File folder, String currentTime, FolderDTO currentFolder)
-            throws ServerException, InsufficientDataException, ErrorResponseException, IOException,
-            NoSuchAlgorithmException, InvalidKeyException, XmlParserException, InvalidResponseException,
-            InternalException {
+            throws Exception{
         FolderDTO folderDTO = new FolderDTO(folder.getFileName() + "-" + currentTime,
                 currentFolder.getFolderName(), folder.getOwner());
         createFolder(folderDTO);
@@ -205,9 +199,7 @@ public class FolderController {
     }
 
     @PostMapping("/copy-file-on-folder/{fileId}")
-    public void copyFile(@PathVariable("fileId") String fileId) throws IOException, ServerException,
-            InsufficientDataException, ErrorResponseException, NoSuchAlgorithmException, InvalidKeyException,
-            InvalidResponseException, XmlParserException, InternalException {
+    public void copyFile(@PathVariable("fileId") String fileId) throws Exception {
         File file = fileService.findById(fileId);
         String uuid = UUID.randomUUID().toString();
 
@@ -226,7 +218,7 @@ public class FolderController {
 
     @PostMapping("/rename-on-folder/{fileId}")
     public ResponseEntity<String> renameFile(@PathVariable("fileId") String fileId,
-                                             @RequestBody Map<String, String> request) {
+                                             @RequestBody Map<String, String> request) throws Exception{
         String newFileName = request.get("newFileName");
         fileService.updateFileName(fileService.findById(fileId), newFileName);
         return ResponseEntity.ok("File rename successfully!");
@@ -246,9 +238,7 @@ public class FolderController {
 
     @DeleteMapping("/delete-folder/{owner}/{parentId}")
     public ResponseEntity<String> deleteFolder(@PathVariable("owner") String owner,
-                                               @PathVariable("parentId") String parentId) throws ServerException,
-            InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException,
-            InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
+                                               @PathVariable("parentId") String parentId) throws  Exception{
         File folder = fileService.findByOwnerAndFileName(owner, parentId);
         List<File> filesONFolder = fileService.findByParentIdAndOwner(folder.getFileName(), owner);
         for (File fileDelete : filesONFolder) {
@@ -265,9 +255,7 @@ public class FolderController {
 
     @DeleteMapping("/folder/{owner}/{fileId}")
     public ResponseEntity<String> deleteFolderByFileId(@PathVariable("owner") String owner,
-                                                       @PathVariable("fileId") String fileId) throws ServerException,
-            InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException,
-            InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
+                                                       @PathVariable("fileId") String fileId) throws Exception{
         File folder = fileService.findById(fileId);
         List<File> filesONFolder = fileService.findByParentIdAndOwner(folder.getFileName(), owner);
         for (File fileDelete : filesONFolder) {
@@ -282,9 +270,7 @@ public class FolderController {
         return ResponseEntity.ok("Deleting successfully!");
     }
 
-    public void deleteFilesFromFolder(File folder) throws ServerException, InsufficientDataException,
-            ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException,
-            InvalidResponseException, XmlParserException, InternalException {
+    public void deleteFilesFromFolder(File folder) throws Exception {
         List<File> files = fileService.findByParentIdAndOwner(folder.getFileName(), folder.getOwner());
         for (File file : files) {
             if (!file.isFolder()) {
@@ -328,7 +314,7 @@ public class FolderController {
 
     @PostMapping("/put-file-to-another-folder/{fileId}")
     public ResponseEntity<String> putFileToFolder(@PathVariable("fileId") String fileId,
-                                                  @RequestBody Map<String, String> request) {
+                                                  @RequestBody Map<String, String> request) throws Exception{
         String folderId = request.get("parentID");
         String parentId = fileService.findById(folderId).getFileName();
         fileService.putFileToFolder(parentId, fileId);
