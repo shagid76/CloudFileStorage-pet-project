@@ -107,7 +107,7 @@ fetch(`http://localhost:8080/files/${owner}`)
                     .then(() => location.reload())
                     .catch(console.error);
             } else if (target.classList.contains('copy-file')) {
-                fetch(`/copy/${fileId}`, {method: "POST"})
+                fetch(`/files/${fileId}/copy`, {method: "POST"})
                     .then(response => {
                         if (!response.ok) throw new Error(`Error: ${response.status}`);
                         return response.text();
@@ -175,7 +175,7 @@ fetch(`http://localhost:8080/files/${owner}`)
                         return;
                     }
 
-                    fetch(`/put-file-to-folder/${fileId}`, {
+                    fetch(`/files/${fileId}/move-to-folder`, {
                         method: "POST",
                         headers: {"Content-Type": "application/json"},
                         body: JSON.stringify({parentID})
@@ -214,7 +214,7 @@ fetch(`http://localhost:8080/files/${owner}`)
                         alert("Folder name cannot be empty!");
                         return;
                     }
-                    fetch(`/rename-folder/${fileId}`, {
+                    fetch(`/folders/${fileId}/rename`, {
                         method: "POST",
                         headers: {"Content-Type": "application/json"},
                         body: JSON.stringify({newFolderName})
@@ -232,7 +232,7 @@ fetch(`http://localhost:8080/files/${owner}`)
                         });
                 };
             } else if (target.classList.contains("copy-folder")) {
-                fetch(`/copy-folder/${fileId}`, {method: "POST"})
+                fetch(`/folders/${fileId}/copy`, {method: "POST"})
                     .then(response => {
                         if (!response.ok) throw new Error(`Error: ${response.status}`);
                         return response.text();
@@ -241,7 +241,7 @@ fetch(`http://localhost:8080/files/${owner}`)
                     .catch(console.error);
             } else if (target.classList.contains("delete-folder")) {
 
-                fetch(`/folder/${owner}/${fileId}`, {method: "DELETE"})
+                fetch(`/folder/${owner}/${fileId}/delete`, {method: "DELETE"})
                     .then(response => {
                         if (!response.ok) throw new Error(`Error: ${response.status}`);
                         window.location.href = `/directory/${owner}`;
@@ -249,7 +249,7 @@ fetch(`http://localhost:8080/files/${owner}`)
                     .catch(console.error);
             } else if (target.classList.contains('download-folder')) {
                 const fileId = target.getAttribute('data-file-id');
-                const downloadUrl = `/download-folder/${fileId}`;
+                const downloadUrl = `/folders/${fileId}/download`;
                 window.location.href = downloadUrl;
             } else if (target.classList.contains('put-folder-to-folder')) {
                 const modal = document.getElementById("modal-window-put-to-folder");
@@ -276,7 +276,7 @@ fetch(`http://localhost:8080/files/${owner}`)
                     }
 
 
-                    fetch(`/put-folder-to-folder/${fileId}`, {
+                    fetch(`/folders/${fileId}/move-to-folder`, {
                         method: "POST",
                         headers: {"Content-Type": "application/json"},
                         body: JSON.stringify({parentID})
@@ -335,7 +335,7 @@ document.getElementById("create-folder").addEventListener("click", async () => {
         const folderNameValue = folderName.value.trim();
 
         try {
-            const response = await fetch(`/check-folder-name/${encodeURIComponent(folderNameValue)}?owner=${encodeURIComponent(owner)}`);
+            const response = await fetch(`/folders/${encodeURIComponent(folderNameValue)}/check-name?owner=${encodeURIComponent(owner)}`);
             if (!response.ok) {
                 throw new Error(`Error: ${response.status}`);
             }
@@ -346,7 +346,7 @@ document.getElementById("create-folder").addEventListener("click", async () => {
                 return;
             }
 
-            fetch(`/folder`, {
+            fetch(`/folders`, {
                 method: "POST",
                 headers: {"Content-Type": "application/json"},
                 body: JSON.stringify({

@@ -7,7 +7,7 @@ if(urlParts.length === 3) {
 
         const formData = new FormData(event.target);
 
-        fetch(`http://localhost:8080/file/${fileOwner}`, {
+        fetch(`http://localhost:8080/files/${fileOwner}/upload`, {
             method: "POST",
             body: formData
         })
@@ -33,7 +33,7 @@ if(urlParts.length === 3) {
 
         const formData = new FormData(event.target);
 
-        fetch(`http://localhost:8080/file/${fileOwner}/${parentId}`, {
+        fetch(`http://localhost:8080/folders/${parentId}/files/${fileOwner}/upload`, {
             method: "POST",
             body: formData
         })

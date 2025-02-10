@@ -2,7 +2,7 @@ const urlParts = window.location.pathname.split('/');
 const parentId = urlParts[urlParts.length - 1];
 const owner = urlParts[urlParts.length - 2];
 
-fetch(`/files/folder/${parentId}/${owner}`)
+fetch(`/folders/${parentId}/files/${owner}`)
     .then(response => {
         if (!response.ok) {
             throw new Error(`Error: ${response.status}`);
@@ -111,7 +111,7 @@ fileList.addEventListener('click', event => {
             .then(() => location.reload())
             .catch(console.error);
     } else if (target.classList.contains('copy-file')) {
-        fetch(`/copy-file-on-folder/${fileId}`, { method: "POST" })
+        fetch(`/files/${fileId}/copy-to-folder`, { method: "POST" })
             .then(response => {
                 if (!response.ok) throw new Error(`Error: ${response.status}`);
                 return response.text();
@@ -137,7 +137,7 @@ fileList.addEventListener('click', event => {
                 alert("File name cannot be empty!");
                 return;
             }
-            fetch(`/rename-on-folder/${fileId}`, {
+            fetch(`/files/${fileId}/rename-on-folder`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ newFileName })
@@ -156,7 +156,7 @@ fileList.addEventListener('click', event => {
         };
     } else if (target.classList.contains('download-file')) {
         const fileId = target.getAttribute('data-file-id');
-        const downloadUrl = `/download-from-folder/${fileId}`;
+        const downloadUrl = `/folders/${fileId}/files/download`;
         window.location.href = downloadUrl;
     }else if(target.classList.contains('put-to-folder')){
         console.log(fileId)
@@ -176,7 +176,7 @@ fileList.addEventListener('click', event => {
                 alert("Folder name cannot be empty!");
                 return;
             }
-            fetch(`/put-file-to-another-folder/${fileId}`, {
+            fetch(`/files/${fileId}/move-to-folder-on-folder`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ parentID })
@@ -215,7 +215,7 @@ fileList.addEventListener('click', event => {
                 alert("Folder name cannot be empty!");
                 return;
             }
-            fetch(`/rename-folder/${fileId}`, {
+            fetch(`/folders/${fileId}/rename`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ newFolderName })
@@ -233,7 +233,7 @@ fileList.addEventListener('click', event => {
                 });
         };
     }else if(target.classList.contains("copy-folder")){
-        fetch(`/copy-folder-on-folder/${fileId}`, { method: "POST" })
+        fetch(`/folders/${fileId}/copy-to-folder`, { method: "POST" })
             .then(response => {
                 if (!response.ok) throw new Error(`Error: ${response.status}`);
                 return response.text();
@@ -242,7 +242,7 @@ fileList.addEventListener('click', event => {
             .catch(console.error);
     } else if(target.classList.contains("delete-folder")) {
 
-        fetch(`/folder/${owner}/${fileId}`, {method: "DELETE"})
+        fetch(`/folder/${owner}/${fileId}/delete`, {method: "DELETE"})
             .then(response => {
                 if (!response.ok) throw new Error(`Error: ${response.status}`);
                 window.location.href = `/folder/${owner}/${parentId}`;
@@ -250,7 +250,7 @@ fileList.addEventListener('click', event => {
             .catch(console.error);
     }else if (target.classList.contains('download-folder')) {
         const fileId = target.getAttribute('data-file-id');
-        const downloadUrl = `/download-folder/${fileId}`;
+        const downloadUrl = `/folders/${fileId}/download`;
         window.location.href = downloadUrl;
     }else if (target.classList.contains('put-folder-to-folder')) {
         const modal = document.getElementById("modal-window-put-to-folder");
@@ -277,7 +277,7 @@ fileList.addEventListener('click', event => {
             }
 
 
-            fetch(`/put-folder-to-folder/${fileId}`, {
+            fetch(`/folders/${fileId}/move-to-folder`, {
                 method: "POST",
                 headers: {"Content-Type": "application/json"},
                 body: JSON.stringify({parentID})
@@ -303,7 +303,7 @@ const deleteFolderForm = document.getElementById("delete-folder");
 if (deleteFolderForm) {
     deleteFolderForm.addEventListener("submit", event => {
         event.preventDefault();
-        fetch(`/delete-folder/${owner}/${parentId}`, { method: "DELETE" })
+        fetch(`/folders/${owner}/${parentId}/delete`, { method: "DELETE" })
             .then(response => {
                 if (!response.ok) throw new Error(`Error: ${response.status}`);
                 window.location.href = `/directory/${owner}`;
@@ -338,7 +338,7 @@ document.getElementById("create-folder").addEventListener("click", async () =>{
         const folderNameValue = folderName.value.trim();
 
         try {
-            const response = await fetch(`/check-folder-name/${encodeURIComponent(folderNameValue)}?owner=${encodeURIComponent(owner)}`);
+            const response = await fetch(`/folders/${encodeURIComponent(folderNameValue)}/check-name?owner=${encodeURIComponent(owner)}`);
             if (!response.ok) {
                 throw new Error(`Error: ${response.status}`);
             }
@@ -349,7 +349,7 @@ document.getElementById("create-folder").addEventListener("click", async () =>{
                 return;
             }
 
-            fetch(`/create-folder`, {
+            fetch(`/folders`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({

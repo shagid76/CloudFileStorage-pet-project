@@ -1,6 +1,5 @@
 package us.yarik.CloudFileStorage.controller;
 
-import io.minio.errors.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpHeaders;
@@ -20,8 +19,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -37,7 +34,7 @@ public class FolderController {
     private final FileService fileService;
     private final MinioService minioService;
 
-    @PostMapping("/folder")
+    @PostMapping("/folders")
     public ResponseEntity<File> createFolder(@RequestBody FolderDTO folderDTO) throws Exception {
         File folder = File.builder()
                 .fileName(folderDTO.getFolderName())
@@ -52,14 +49,14 @@ public class FolderController {
         return ResponseEntity.ok(folder);
     }
 
-    @GetMapping("/files/folder/{parentId}/{owner}")
+    @GetMapping("/folders/{parentId}/files/{owner}")
     public List<File> allFilesFromFolder(@PathVariable("parentId") String parentId,
                                          @PathVariable("owner") String owner) {
         return fileService.findByParentIdAndOwner(parentId, owner);
     }
 
 
-    @PostMapping("/file/{owner}/{parentId}")
+    @PostMapping("/folders/{parentId}/files/{owner}/upload")
     public ResponseEntity<String> addFileToFolder(@PathVariable("owner") String owner,
                                                   @PathVariable("parentId") String parentId,
                                                   @RequestParam("file") MultipartFile file) {
@@ -88,7 +85,7 @@ public class FolderController {
         }
     }
 
-    @GetMapping("/check-folder-name/{folderName}")
+    @GetMapping("/folders/{folderName}/check-name")
     public ResponseEntity<?> checkFolderName(@PathVariable("folderName") String folderName,
                                              @RequestParam String owner) {
         File file = fileService.findByOwnerAndFileName(owner, folderName);
@@ -96,8 +93,8 @@ public class FolderController {
         return ResponseEntity.ok().body(Map.of("isNameUnique", isNameUnique));
     }
 
-    @PostMapping("/copy-folder/{fileId}")
-    public ResponseEntity<String> copyFolder(@PathVariable("fileId") String fileId) throws Exception{
+    @PostMapping("/folders/{fileId}/copy")
+    public ResponseEntity<String> copyFolder(@PathVariable("fileId") String fileId) throws Exception {
         File folder = fileService.findById(fileId);
         System.out.println(folder.getFileName());
         List<File> filesOnFolder = fileService.findByOwnerAndFileNameList(folder.getOwner(),
@@ -132,7 +129,8 @@ public class FolderController {
         }
         return ResponseEntity.ok("Folder copied!");
     }
-    @PostMapping("/copy-folder-on-folder/{fileId}")
+
+    @PostMapping("/folders/{fileId}/copy-to-folder")
     public ResponseEntity<String> copyFolderOnFolder(@PathVariable("fileId") String fileId) throws Exception {
         File folder = fileService.findById(fileId);
         System.out.println(folder.getFileName());
@@ -171,7 +169,7 @@ public class FolderController {
 
 
     public void copyFilesOnFolder(File folder, String currentTime, FolderDTO currentFolder)
-            throws Exception{
+            throws Exception {
         FolderDTO folderDTO = new FolderDTO(folder.getFileName() + "-" + currentTime,
                 currentFolder.getFolderName(), folder.getOwner());
         createFolder(folderDTO);
@@ -198,7 +196,7 @@ public class FolderController {
         }
     }
 
-    @PostMapping("/copy-file-on-folder/{fileId}")
+    @PostMapping("/files/{fileId}/copy-to-folder")
     public void copyFile(@PathVariable("fileId") String fileId) throws Exception {
         File file = fileService.findById(fileId);
         String uuid = UUID.randomUUID().toString();
@@ -216,15 +214,15 @@ public class FolderController {
         minioService.addFile(inputStream, file.getFileType(), uuid);
     }
 
-    @PostMapping("/rename-on-folder/{fileId}")
+    @PostMapping("/files/{fileId}/rename-on-folder")
     public ResponseEntity<String> renameFile(@PathVariable("fileId") String fileId,
-                                             @RequestBody Map<String, String> request) throws Exception{
+                                             @RequestBody Map<String, String> request) throws Exception {
         String newFileName = request.get("newFileName");
         fileService.updateFileName(fileService.findById(fileId), newFileName);
         return ResponseEntity.ok("File rename successfully!");
     }
 
-    @GetMapping("/download-from-folder/{fileId}")
+    @GetMapping("/folders/{fileId}/files/download")
     public ResponseEntity<byte[]> downloadFile(@PathVariable String fileId) {
         File file = fileService.findById(fileId);
         ByteArrayResource fileDownload = minioService.downloadFile(file.getUuid());
@@ -236,9 +234,9 @@ public class FolderController {
                 .body(fileDownload.getByteArray());
     }
 
-    @DeleteMapping("/delete-folder/{owner}/{parentId}")
+    @DeleteMapping("/folders/{owner}/{parentId}/delete")
     public ResponseEntity<String> deleteFolder(@PathVariable("owner") String owner,
-                                               @PathVariable("parentId") String parentId) throws  Exception{
+                                               @PathVariable("parentId") String parentId) throws Exception {
         File folder = fileService.findByOwnerAndFileName(owner, parentId);
         List<File> filesONFolder = fileService.findByParentIdAndOwner(folder.getFileName(), owner);
         for (File fileDelete : filesONFolder) {
@@ -253,9 +251,9 @@ public class FolderController {
         return ResponseEntity.ok("Deleting successfully!");
     }
 
-    @DeleteMapping("/folder/{owner}/{fileId}")
+    @DeleteMapping("/folder/{owner}/{fileId}/delete")
     public ResponseEntity<String> deleteFolderByFileId(@PathVariable("owner") String owner,
-                                                       @PathVariable("fileId") String fileId) throws Exception{
+                                                       @PathVariable("fileId") String fileId) throws Exception {
         File folder = fileService.findById(fileId);
         List<File> filesONFolder = fileService.findByParentIdAndOwner(folder.getFileName(), owner);
         for (File fileDelete : filesONFolder) {
@@ -283,7 +281,7 @@ public class FolderController {
         fileService.deleteFile(folder);
     }
 
-    @GetMapping("/download-folder/{fileId}")
+    @GetMapping("/folders/{fileId}/download")
     public ResponseEntity<StreamingResponseBody> downloadFolder(@PathVariable String fileId) throws IOException {
         File folder = fileService.findById(fileId);
         List<File> files = fileService.findByParentIdAndOwner(folder.getFileName(), folder.getOwner());
@@ -312,9 +310,9 @@ public class FolderController {
                 .body(responseBody);
     }
 
-    @PostMapping("/put-file-to-another-folder/{fileId}")
+    @PostMapping("/files/{fileId}/move-to-folder-on-folder")
     public ResponseEntity<String> putFileToFolder(@PathVariable("fileId") String fileId,
-                                                  @RequestBody Map<String, String> request) throws Exception{
+                                                  @RequestBody Map<String, String> request) throws Exception {
         String folderId = request.get("parentID");
         String parentId = fileService.findById(folderId).getFileName();
         fileService.putFileToFolder(parentId, fileId);

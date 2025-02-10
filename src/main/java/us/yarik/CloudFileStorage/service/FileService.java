@@ -71,9 +71,9 @@ public class FileService {
         return fileRepository.findByParentIdAndOwner(parentId, owner);
     }
 
-    public void putFileToFolder(String parentId, String fileId) throws Exception{
+    public void putFileToFolder(String parentId, String fileId) throws Exception {
         File file = findById(fileId);
-        if(parentId == null || parentId.isEmpty()){
+        if (parentId == null || parentId.isEmpty()) {
             throw new Exception("ParentId can't be null!");
         }
         file.setParentId(parentId);
@@ -96,8 +96,8 @@ public class FileService {
         fileRepository.save(folder);
     }
 
-    public List<File> findByOwner(String owner) throws Exception{
-        if(owner.isEmpty() || owner == null){
+    public List<File> findByOwner(String owner) throws Exception {
+        if (owner.isEmpty() || owner == null) {
             throw new Exception("Owner can't be null!");
         }
         return fileRepository.findByOwner(owner);
