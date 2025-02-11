@@ -13,10 +13,6 @@ import java.util.Optional;
 public class FileService {
     private final FileRepository fileRepository;
 
-    public List<File> findAll() {
-        return fileRepository.findAll();
-    }
-
     public File uploadFile(File file) throws Exception {
         if (file == null) {
             throw new Exception("You can't upload null file!");
