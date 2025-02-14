@@ -27,7 +27,6 @@ import java.util.UUID;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-
 @RestController
 @RequiredArgsConstructor
 public class FolderController {
@@ -40,6 +39,7 @@ public class FolderController {
                 .fileName(folderDTO.getFolderName())
                 .isFolder(true)
                 .fileSize(0L)
+                .uuid(UUID.randomUUID().toString())
                 .uploadDate(LocalDateTime.now())
                 .parentId(folderDTO.getParentId())
                 .owner(folderDTO.getOwner())
@@ -289,15 +289,14 @@ public class FolderController {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         ZipOutputStream zipOutputStream = new ZipOutputStream(byteArrayOutputStream);
 
-        for (File file : files) {
-            byte[] fileBytes = minioService.downloadFile(file.getUuid()).getByteArray();
-            ZipEntry zipEntry = new ZipEntry(file.getFileName().replace(" ", "_"));
-            zipOutputStream.putNextEntry(zipEntry);
-            zipOutputStream.write(fileBytes);
-            zipOutputStream.closeEntry();
+        try {
+            addToZip(files, zipOutputStream, folder.getFileName() + "/");
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw e;
+        } finally {
+            zipOutputStream.close();
         }
-
-        zipOutputStream.close();
 
         StreamingResponseBody responseBody = outputStream -> {
             outputStream.write(byteArrayOutputStream.toByteArray());
@@ -305,9 +304,30 @@ public class FolderController {
         };
 
         return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename*=UTF-8''" + URLEncoder.encode(folder.getFileName() + ".zip", StandardCharsets.UTF_8))
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename*=UTF-8''" +
+                        URLEncoder.encode(folder.getFileName() + ".zip", StandardCharsets.UTF_8))
                 .contentType(MediaType.APPLICATION_OCTET_STREAM)
                 .body(responseBody);
+    }
+
+
+    private void addToZip(List<File> files, ZipOutputStream zipOutputStream, String fodlerPath) throws IOException {
+        for (File file : files) {
+            String filePath = fodlerPath + file.getFileName().replace(" ", "_");
+            if (file.isFolder()) {
+                zipOutputStream.putNextEntry(new ZipEntry(filePath + "/"));
+                zipOutputStream.closeEntry();
+
+                List<File> subFiles = fileService.findByParentIdAndOwner(file.getFileName(), file.getOwner());
+                addToZip(subFiles, zipOutputStream, filePath + "/");
+            } else {
+                byte[] fileBytes = minioService.downloadFile(file.getUuid()).getByteArray();
+                ZipEntry zipEntry = new ZipEntry(filePath);
+                zipOutputStream.putNextEntry(zipEntry);
+                zipOutputStream.write(fileBytes);
+                zipOutputStream.closeEntry();
+            }
+        }
     }
 
     @PostMapping("/files/{fileId}/move-to-folder-on-folder")
