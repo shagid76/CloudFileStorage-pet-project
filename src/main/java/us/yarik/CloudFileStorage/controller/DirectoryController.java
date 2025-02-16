@@ -17,7 +17,7 @@ public class DirectoryController {
 
 
     @GetMapping("/redirect_to_directory")
-    public String redirectToBalance(Authentication authentication) {
+    public String redirectToDirectory(Authentication authentication) {
         String email = authentication.getName();
         Optional<User> user = userService.findByEmail(email);
         return user.map(value -> "redirect:/directory/" +
