@@ -29,7 +29,6 @@ public class DirectoryController {
         return "directory";
     }
 
-
     @GetMapping("/add-file/{owner}")
     public String addFilePage() {
         return "add-file";
@@ -39,7 +38,6 @@ public class DirectoryController {
     public String addFilePageToFolder() {
         return "add-file";
     }
-
 
     @GetMapping("/folder/{owner}/{fileName}")
     public String folderPage() {

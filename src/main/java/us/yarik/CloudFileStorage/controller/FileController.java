@@ -27,7 +27,6 @@ public class FileController {
     private final FileService fileService;
     private final MinioService minioService;
 
-
     @GetMapping("/files/{owner}")
     public List<File> getAllFiles(@PathVariable("owner") String owner) {
         return fileService.findByOwnerAndParentIdIsNull(owner);
@@ -160,5 +159,4 @@ public class FileController {
         fileService.setParentId(folder, parentId);
         return ResponseEntity.ok("File putted successfully!");
     }
-
 }

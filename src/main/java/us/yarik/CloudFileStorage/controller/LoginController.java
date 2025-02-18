@@ -40,7 +40,6 @@ public class LoginController {
         return "login";
     }
 
-
     @GetMapping("/registration")
     public String registrationGet(Model model) {
         model.addAttribute("user", new User());
@@ -61,5 +60,4 @@ public class LoginController {
         userService.save(user);
         return "redirect:/login";
     }
-
 }

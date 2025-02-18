@@ -55,7 +55,6 @@ public class FolderController {
         return fileService.findByParentIdAndOwner(parentId, owner);
     }
 
-
     @PostMapping("/folders/{parentId}/files/{owner}/upload")
     public ResponseEntity<String> addFileToFolder(@PathVariable("owner") String owner,
                                                   @PathVariable("parentId") String parentId,
@@ -338,5 +337,4 @@ public class FolderController {
         fileService.putFileToFolder(parentId, fileId);
         return ResponseEntity.ok("File putted successfully!");
     }
-
 }
