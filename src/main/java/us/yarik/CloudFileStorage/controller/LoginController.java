@@ -1,5 +1,6 @@
 package us.yarik.CloudFileStorage.controller;
 
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -47,7 +48,7 @@ public class LoginController {
     }
 
     @PostMapping("/registration")
-    public String registrationPost(@ModelAttribute("user") User user, Model model, BindingResult bindingResult) {
+    public String registrationPost(@ModelAttribute("user")  @Valid User user, BindingResult bindingResult , Model model) {
         if (bindingResult.hasErrors()) {
             return "registration";
         }
