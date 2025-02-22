@@ -29,10 +29,9 @@ public class SecurityConfig {
                 })
                 .csrf(AbstractHttpConfigurer::disable)
                 .formLogin(formLogin -> {
-                    formLogin.loginPage("/login");
+                    formLogin.loginPage("/login").permitAll();
                     formLogin.usernameParameter("email");
                     formLogin.defaultSuccessUrl("/directory");
-                    formLogin.permitAll();
                 })
                 .rememberMe(me -> {
                     me.tokenValiditySeconds(T_30_DAYS_IN_SECONDS);

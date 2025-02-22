@@ -1,6 +1,5 @@
-const urlParts = window.location.pathname.split('/');
-const parentId = urlParts[urlParts.length - 1];
-const owner = urlParts[urlParts.length - 2];
+const parentId = document.getElementById("data-container-parentId").getAttribute("parentId");
+const owner = document.getElementById("data-container-email").getAttribute("email");
 
 fetch(`/folders/${parentId}/files/${owner}`)
     .then(response => {
@@ -85,7 +84,7 @@ fetch(`/folders/${parentId}/files/${owner}`)
                     if (target.classList.contains("folder-page-link")) {
                         event.preventDefault();
                         const folderName = target.textContent.trim();
-                        window.location.href = `/folder/${owner}/${folderName}`;
+                        window.location.href = `/folder/${folderName}`;
                         return;
                     }
                 });
@@ -245,7 +244,7 @@ fileList.addEventListener('click', event => {
         fetch(`/folder/${owner}/${fileId}/delete`, {method: "DELETE"})
             .then(response => {
                 if (!response.ok) throw new Error(`Error: ${response.status}`);
-                window.location.href = `/folder/${owner}/${parentId}`;
+                window.location.href = `/folder/${parentId}`;
             })
             .catch(console.error);
     }else if (target.classList.contains('download-folder')) {
@@ -306,7 +305,7 @@ if (deleteFolderForm) {
         fetch(`/folders/${owner}/${parentId}/delete`, { method: "DELETE" })
             .then(response => {
                 if (!response.ok) throw new Error(`Error: ${response.status}`);
-                window.location.href = `/directory/${owner}`;
+                window.location.href = `/directory`;
             })
             .catch(console.error);
     });
@@ -315,12 +314,12 @@ document.getElementById("back-to-directory").addEventListener("click", event => 
     const target = event.target;
     if (target.classList.contains("back-to-directory")) {
         event.preventDefault();
-        window.location.href = `/directory/${owner}`;
+        window.location.href = `/directory`;
     }
 });
 const addFileLink = document.getElementById("upload-file");
 if (addFileLink) {
-    addFileLink.href = `/add-file/${owner}/${parentId}`;
+    addFileLink.href = `/add-file/${parentId}`;
 }
 document.getElementById("create-folder").addEventListener("click", async () =>{
     const modal = document.getElementById("modal-window-create-folder");

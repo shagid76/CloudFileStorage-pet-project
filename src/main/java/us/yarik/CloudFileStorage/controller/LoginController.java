@@ -1,6 +1,7 @@
 package us.yarik.CloudFileStorage.controller;
 
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -16,24 +17,9 @@ import us.yarik.CloudFileStorage.model.User;
 import us.yarik.CloudFileStorage.service.UserService;
 
 @Controller
+@RequiredArgsConstructor
 public class LoginController {
     private final UserService userService;
-
-    @Autowired
-    public LoginController(UserService userService) {
-        this.userService = userService;
-    }
-
-    @GetMapping("/")
-    public String redirectToBalance(Model model) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null && authentication.isAuthenticated() && !(authentication instanceof AnonymousAuthenticationToken)) {
-            return "redirect:/redirect_to_directory";
-        } else {
-            model.addAttribute("user", new User());
-            return "login";
-        }
-    }
 
     @GetMapping("/login")
     public String loginGet(Model model) {

@@ -3,44 +3,43 @@ package us.yarik.CloudFileStorage.controller;
 import lombok.AllArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import us.yarik.CloudFileStorage.model.User;
-import us.yarik.CloudFileStorage.service.UserService;
-
-import java.util.Optional;
+import org.springframework.web.bind.annotation.PathVariable;
 
 
 @Controller
 @AllArgsConstructor
 public class DirectoryController {
-    private final UserService userService;
 
-
-    @GetMapping("/redirect_to_directory")
-    public String redirectToDirectory(Authentication authentication) {
+    @GetMapping("/directory")
+    public String directoryPage(Authentication authentication, Model model) {
         String email = authentication.getName();
-        Optional<User> user = userService.findByEmail(email);
-        return user.map(value -> "redirect:/directory/" +
-                value.getEmail().substring(0, value.getEmail().indexOf("@"))).orElse("redirect:/login");
-    }
-
-    @GetMapping("/directory/{owner}")
-    public String directoryPage() {
+        System.out.println(email);
+        model.addAttribute("email", email.substring(0, email.indexOf("@")));
         return "directory";
     }
 
-    @GetMapping("/add-file/{owner}")
-    public String addFilePage() {
+    @GetMapping("/add-file")
+    public String addFilePage(Authentication authentication, Model model) {
+        String email = authentication.getName();
+        model.addAttribute("email", email.substring(0, email.indexOf("@")));
         return "add-file";
     }
 
-    @GetMapping("/add-file/{owner}/{folder}")
-    public String addFilePageToFolder() {
+    @GetMapping("/add-file/{parentId}")
+    public String addFilePageToFolder(@PathVariable("parentId") String parentId, Authentication authentication, Model model) {
+        String email = authentication.getName();
+        model.addAttribute("email", email.substring(0, email.indexOf("@")));
+        model.addAttribute("parentId", parentId);
         return "add-file";
     }
 
-    @GetMapping("/folder/{owner}/{fileName}")
-    public String folderPage() {
+    @GetMapping("/folder/{parentId}")
+    public String folderPage(@PathVariable("parentId") String parentId, Authentication authentication, Model model) {
+        String email = authentication.getName();
+        model.addAttribute("email", email.substring(0, email.indexOf("@")));
+        model.addAttribute("parentId", parentId);
         return "folder";
     }
 }

@@ -32,7 +32,6 @@ public class FileController {
         return fileService.findByOwnerAndParentIdIsNull(owner);
     }
 
-
     @DeleteMapping("/delete-directory/{owner}")
     public void deleteDirectory(@PathVariable("owner") String owner) throws Exception {
         List<File> files = fileService.findByOwner(owner);
@@ -51,7 +50,6 @@ public class FileController {
             String uuid = UUID.randomUUID().toString();
             InputStream inputStream = file.getInputStream();
             String contentType = file.getContentType();
-
 
             File uploadFile = new File();
             uploadFile.setFileName(file.getOriginalFilename());
@@ -88,7 +86,6 @@ public class FileController {
         minioService.deleteFile(file.getUuid());
         fileService.deleteFile(file);
     }
-
 
     @PostMapping("/files/{fileId}/copy")
     public void copyFile(@PathVariable("fileId") String fileId) throws Exception {

@@ -1,5 +1,4 @@
-const urlParts = window.location.pathname.split('/');
-const owner = urlParts[urlParts.length - 1];
+const owner = document.getElementById("data-container-email").getAttribute("email");
 
 fetch(`http://localhost:8080/files/${owner}`)
     .then(response => {
@@ -82,7 +81,7 @@ fetch(`http://localhost:8080/files/${owner}`)
                     if (target.classList.contains("folder-page-link")) {
                         event.preventDefault();
                         const folderName = target.textContent.trim();
-                        window.location.href = `/folder/${owner}/${folderName}`;
+                        window.location.href = `/folder/${folderName}`;
                         return;
                     }
                 });
@@ -244,7 +243,7 @@ fetch(`http://localhost:8080/files/${owner}`)
                 fetch(`/folder/${owner}/${fileId}/delete`, {method: "DELETE"})
                     .then(response => {
                         if (!response.ok) throw new Error(`Error: ${response.status}`);
-                        window.location.href = `/directory/${owner}`;
+                        window.location.href = `/directory`;
                     })
                     .catch(console.error);
             } else if (target.classList.contains('download-folder')) {
@@ -306,7 +305,7 @@ if (deleteDirectoryForm) {
         fetch(`/delete-directory/${owner}`, {method: "DELETE"})
             .then(response => {
                 if (!response.ok) throw new Error(`Error: ${response.status}`);
-                window.location.href = `/directory/${owner}`;
+                window.location.href = `/directory`;
             })
             .catch(console.error);
     });
@@ -314,7 +313,7 @@ if (deleteDirectoryForm) {
 
 const addFileLink = document.getElementById("upload-file");
 if (addFileLink) {
-    addFileLink.href = `/add-file/${owner}`;
+    addFileLink.href = `/add-file`;
 }
 
 document.getElementById("create-folder").addEventListener("click", async () => {
