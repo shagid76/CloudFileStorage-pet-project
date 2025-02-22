@@ -15,18 +15,22 @@
             <div class="mb-3">
                 <label for="InputName" class="form-label">Name</label>
                 <input type="text" class="form-control" id="InputName" th:field="*{name}">
+                <p th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></p>
             </div>
             <div class="mb-3">
                 <label for="InputSurname" class="form-label">Surname</label>
                 <input type="text" class="form-control" id="InputSurname" th:field="*{surname}">
+                <p th:if="${#fields.hasErrors('surname')}" th:errors="*{surname}"></p>
             </div>
             <div class="mb-3">
                 <label for="InputEmail" class="form-label">Email address</label>
                 <input type="email" class="form-control" id="InputEmail" th:field="*{email}">
+                <p th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></p>
             </div>
             <div class="mb-3">
                 <label for="InputPassword" class="form-label">Password</label>
                 <input type="password" class="form-control" id="InputPassword" th:field="*{password}">
+                <p th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></p>
             </div>
             <div class="alert alert-danger" role="alert" th:if="${error}">
                <p th:text="${error}"></p>

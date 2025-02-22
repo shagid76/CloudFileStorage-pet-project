@@ -1,13 +1,13 @@
 package us.yarik.CloudFileStorage.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import us.yarik.CloudFileStorage.advice.ConflictException;
+import us.yarik.CloudFileStorage.model.CreateUserRequest;
 import us.yarik.CloudFileStorage.model.User;
 import us.yarik.CloudFileStorage.repository.UserRepository;
-
-import java.util.Optional;
 
 @Service
 public class UserService {
@@ -24,16 +24,29 @@ public class UserService {
         userRepository.save(user);
     }
 
-    public void registerCheck(User user) {
-        if (userRepository.findByEmail(user.getEmail()).isPresent()) {
-            throw new ConflictException("Email already exist.");
+    public void registerCheck(CreateUserRequest createUserRequest) {
+        if (userRepository.existsByEmail(createUserRequest.getEmail())) {
+            throw new ConflictException("Email already exists");
         }
+    }
+
+    public User findByEmail(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with email " + email));
+    }
+
+    public User mapToUser(CreateUserRequest createUserRequest) {
+        User user = new User();
+        user.setName(createUserRequest.getName());
+        user.setSurname(createUserRequest.getSurname());
+        user.setEmail(createUserRequest.getEmail());
+        user.setPassword(createUserRequest.getPassword());
+        return user;
+    }
+
+    public void createUser(CreateUserRequest createUserRequest) {
+        User user = mapToUser(createUserRequest);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         userRepository.save(user);
     }
-
-    public Optional<User> findByEmail(String email) {
-        return userRepository.findByEmail(email);
-    }
-
 }
