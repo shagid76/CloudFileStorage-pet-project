@@ -2,6 +2,8 @@ package us.yarik.CloudFileStorage.service;
 
 import io.minio.*;
 import io.minio.errors.*;
+import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.stereotype.Service;
@@ -12,16 +14,13 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 
 @Service
+@RequiredArgsConstructor
 public class MinioService {
 
     private final MinioClient minioClient;
 
     @Value("${minio.bucketName}")
     private String bucketName;
-
-    public MinioService(MinioClient minioClient) {
-        this.minioClient = minioClient;
-    }
 
     public ByteArrayResource downloadFile(String uuid) {
         GetObjectArgs getObjectArgs = GetObjectArgs.builder()

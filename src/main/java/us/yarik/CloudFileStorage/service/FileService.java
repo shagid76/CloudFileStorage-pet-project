@@ -24,7 +24,6 @@ public class FileService {
         return fileRepository.findByOwnerAndParentIdIsNull(owner);
     }
 
-
     public void deleteFile(File file) throws Exception {
         if (file == null) {
             throw new Exception("You can't delete null file!");
@@ -98,5 +97,4 @@ public class FileService {
         }
         return fileRepository.findByOwner(owner);
     }
-
 }

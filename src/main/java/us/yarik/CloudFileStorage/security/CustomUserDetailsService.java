@@ -11,9 +11,7 @@ import us.yarik.CloudFileStorage.repository.UserRepository;
 @Service
 @AllArgsConstructor
 public class CustomUserDetailsService implements UserDetailsService {
-
     private final UserRepository userRepository;
-
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -24,6 +22,5 @@ public class CustomUserDetailsService implements UserDetailsService {
                 .username(user.getEmail())
                 .password(user.getPassword())
                 .build();
-
     }
 }
