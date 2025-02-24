@@ -15,6 +15,7 @@ import us.yarik.CloudFileStorage.service.FileService;
 import us.yarik.CloudFileStorage.service.MinioService;
 
 import java.io.ByteArrayOutputStream;
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URLEncoder;
@@ -95,7 +96,6 @@ public class FolderController {
     @PostMapping("/folders/{fileId}/copy")
     public ResponseEntity<String> copyFolder(@PathVariable("fileId") String fileId) throws Exception {
         File folder = fileService.findById(fileId);
-        System.out.println(folder.getFileName());
         List<File> filesOnFolder = fileService.findByOwnerAndFileNameList(folder.getOwner(),
                 folder.getFileName());
 
@@ -132,7 +132,6 @@ public class FolderController {
     @PostMapping("/folders/{fileId}/copy-to-folder")
     public ResponseEntity<String> copyFolderOnFolder(@PathVariable("fileId") String fileId) throws Exception {
         File folder = fileService.findById(fileId);
-        System.out.println(folder.getFileName());
         List<File> filesOnFolder = fileService.findByOwnerAndFileNameList(folder.getOwner(),
                 folder.getFileName());
 
@@ -173,7 +172,6 @@ public class FolderController {
                 currentFolder.getFolderName(), folder.getOwner());
         createFolder(folderDTO);
         List<File> files = fileService.findByParentIdAndOwner(folder.getFileName(), folder.getOwner());
-        System.out.println(files.toString());
         for (File file : files) {
             if (!file.isFolder()) {
                 String uuid = UUID.randomUUID().toString();
@@ -291,8 +289,7 @@ public class FolderController {
         try {
             addToZip(files, zipOutputStream, folder.getFileName() + "/");
         } catch (IOException e) {
-            e.printStackTrace();
-            throw e;
+            throw  new EOFException(e.getMessage());
         } finally {
             zipOutputStream.close();
         }
@@ -310,9 +307,9 @@ public class FolderController {
     }
 
 
-    private void addToZip(List<File> files, ZipOutputStream zipOutputStream, String fodlerPath) throws IOException {
+    private void addToZip(List<File> files, ZipOutputStream zipOutputStream, String folderPath) throws IOException {
         for (File file : files) {
-            String filePath = fodlerPath + file.getFileName().replace(" ", "_");
+            String filePath = folderPath + file.getFileName().replace(" ", "_");
             if (file.isFolder()) {
                 zipOutputStream.putNextEntry(new ZipEntry(filePath + "/"));
                 zipOutputStream.closeEntry();

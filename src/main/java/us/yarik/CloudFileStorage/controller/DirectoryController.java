@@ -15,7 +15,6 @@ public class DirectoryController {
     @GetMapping("/directory")
     public String directoryPage(Authentication authentication, Model model) {
         String email = authentication.getName();
-        System.out.println(email);
         model.addAttribute("email", email.substring(0, email.indexOf("@")));
         return "directory";
     }

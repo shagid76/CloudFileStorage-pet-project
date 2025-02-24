@@ -27,5 +27,4 @@ public class File {
 
     private String parentId;
     private boolean isFolder;
-
 }

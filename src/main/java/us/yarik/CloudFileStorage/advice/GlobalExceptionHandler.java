@@ -7,7 +7,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
-
     @ExceptionHandler(ConflictException.class)
     public String handleConflictException(ConflictException ex, Model model, HttpServletResponse response) {
         response.setStatus(HttpServletResponse.SC_CONFLICT);

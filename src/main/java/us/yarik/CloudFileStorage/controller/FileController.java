@@ -142,7 +142,6 @@ public class FileController {
             List<File> folders = fileService.findByOwnerAndIsFolderIsTrue(owner);
             return ResponseEntity.ok(folders);
         } catch (Exception e) {
-            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }

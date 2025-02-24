@@ -14,7 +14,6 @@ public class MinioConfig {
     @Value("${minio.secretKey}")
     private String secretKey;
 
-
     @Bean
     public MinioClient minioClient() {
         return MinioClient.builder()
