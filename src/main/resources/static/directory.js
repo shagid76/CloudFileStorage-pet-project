@@ -28,7 +28,6 @@ fetch(`http://localhost:8080/files/${owner}`)
             listItem.className = "list-group-item";
 
             if (file.folder === false) {
-
                 const sizeInMB = (file.fileSize / 1000000).toPrecision(3);
                 listItem.innerHTML = `
     <li class="list-group-item d-flex align-items-center justify-content-between">
@@ -74,7 +73,6 @@ fetch(`http://localhost:8080/files/${owner}`)
             </ul>
         </div>
     </li>`
-
                 fileList.addEventListener("click", event => {
                     const target = event.target;
 
@@ -86,7 +84,6 @@ fetch(`http://localhost:8080/files/${owner}`)
                     }
                 });
             }
-
             fileList.appendChild(listItem);
         });
 
@@ -274,7 +271,6 @@ fetch(`http://localhost:8080/files/${owner}`)
                         return;
                     }
 
-
                     fetch(`/folders/${fileId}/move-to-folder`, {
                         method: "POST",
                         headers: {"Content-Type": "application/json"},
@@ -372,7 +368,6 @@ document.getElementById("create-folder").addEventListener("click", async () => {
     };
 })
 
-
 $('#parentId').select2({
     placeholder: "Search folders...",
     allowClear: true,
@@ -396,6 +391,3 @@ $('#parentId').select2({
         cache: true
     }
 });
-
-
-

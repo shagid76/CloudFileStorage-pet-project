@@ -4,7 +4,6 @@ const fileOwner = document.getElementById("data-container-email").getAttribute("
 if (!parentId || parentId.trim() === "") {
     document.getElementById("add-file").addEventListener("submit", (event) => {
         event.preventDefault();
-
         const formData = new FormData(event.target);
 
         fetch(`http://localhost:8080/files/${fileOwner}/upload`, {
@@ -27,7 +26,6 @@ if (!parentId || parentId.trim() === "") {
 } else {
     document.getElementById("add-file").addEventListener("submit", (event) => {
         event.preventDefault();
-
         const formData = new FormData(event.target);
 
         fetch(`http://localhost:8080/folders/${parentId}/files/${fileOwner}/upload`, {

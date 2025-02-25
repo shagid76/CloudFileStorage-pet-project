@@ -20,7 +20,6 @@ fetch(`/folders/${parentId}/files/${owner}`)
 
         emptyMessage.classList.add("d-none");
         fileList.classList.remove("d-none");
-
         files.forEach(file => {
             const uploadDate = new Date(file.uploadDate).toLocaleString("en-US", {
                 year: "numeric",
@@ -33,7 +32,6 @@ fetch(`/folders/${parentId}/files/${owner}`)
             const listItem = document.createElement("li");
             listItem.className = "list-group-item";
             if(file.folder === false){
-
                 const sizeInMB = (file.fileSize / 1000000).toPrecision(3);
                 listItem.innerHTML = `
     <li class="list-group-item d-flex align-items-center justify-content-between">
@@ -92,7 +90,6 @@ fetch(`/folders/${parentId}/files/${owner}`)
             fileList.appendChild(listItem);
         });
     });
-
 
 fileList.addEventListener('click', event => {
     event.preventDefault();
@@ -193,8 +190,6 @@ fileList.addEventListener('click', event => {
                 .catch(error =>{
                     console.error(error);
                 })
-
-
         };
     }else if(target.classList.contains("rename-folder")){
         const modal = document.getElementById("modal-window-rename-folder");
@@ -274,7 +269,6 @@ fileList.addEventListener('click', event => {
                 alert("You cannot move a folder into itself!");
                 return;
             }
-
 
             fetch(`/folders/${fileId}/move-to-folder`, {
                 method: "POST",
@@ -375,7 +369,6 @@ document.getElementById("create-folder").addEventListener("click", async () =>{
     };
 
 })
-
 
 $('#parentId').select2({
     placeholder: "Search folders...",
