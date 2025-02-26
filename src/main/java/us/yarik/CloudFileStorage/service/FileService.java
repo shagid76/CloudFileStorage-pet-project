@@ -13,11 +13,11 @@ import java.util.Optional;
 public class FileService {
     private final FileRepository fileRepository;
 
-    public File uploadFile(File file) throws Exception {
+    public void uploadFile(File file) throws Exception {
         if (file == null) {
             throw new Exception("You can't upload null file!");
         }
-        return fileRepository.save(file);
+        fileRepository.save(file);
     }
 
     public List<File> findByOwnerAndParentIdIsNull(String owner) {
@@ -33,14 +33,11 @@ public class FileService {
 
     public File findByOwnerAndFileName(String owner, String fileName) {
         Optional<File> file = fileRepository.findByOwnerAndFileName(owner, fileName);
-        if (file.isPresent()) {
-            return file.get();
-        }
         return file.orElse(null);
     }
 
     public void updateFileName(File file, String fileName) throws Exception {
-        if (fileName.isEmpty() || fileName == null) {
+        if (fileName.isEmpty()) {
             throw new Exception("File name can't be null!");
         }
         file.setFileName(fileName);
@@ -48,7 +45,7 @@ public class FileService {
     }
 
     public void deleteFilesByOwner(String owner) throws Exception {
-        if (owner.isEmpty() || owner == null) {
+        if (owner.isEmpty()) {
             throw new Exception("Owner can't be null!");
         }
         fileRepository.deleteByOwner(owner);
@@ -56,9 +53,6 @@ public class FileService {
 
     public File findById(String id) {
         Optional<File> file = fileRepository.findById(id);
-        if (file.isPresent()) {
-            return file.get();
-        }
         return file.orElse(null);
     }
 
@@ -84,7 +78,7 @@ public class FileService {
     }
 
     public void setParentId(File folder, String parentId) throws Exception {
-        if (parentId.isEmpty() || parentId == null) {
+        if (parentId.isEmpty()) {
             throw new Exception("ParentId can't be null!");
         }
         folder.setParentId(parentId);
@@ -92,7 +86,7 @@ public class FileService {
     }
 
     public List<File> findByOwner(String owner) throws Exception {
-        if (owner.isEmpty() || owner == null) {
+        if (owner.isEmpty()) {
             throw new Exception("Owner can't be null!");
         }
         return fileRepository.findByOwner(owner);
