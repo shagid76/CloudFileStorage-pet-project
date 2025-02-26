@@ -2,7 +2,6 @@ package us.yarik.CloudFileStorage.service;
 
 import io.minio.*;
 import io.minio.errors.*;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;

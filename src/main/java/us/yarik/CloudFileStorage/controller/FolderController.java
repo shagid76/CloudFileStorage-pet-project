@@ -165,7 +165,6 @@ public class FolderController {
         return ResponseEntity.ok("Folder copied!");
     }
 
-
     public void copyFilesOnFolder(File folder, String currentTime, FolderDTO currentFolder)
             throws Exception {
         FolderDTO folderDTO = new FolderDTO(folder.getFileName() + "-" + currentTime,
@@ -305,7 +304,6 @@ public class FolderController {
                 .contentType(MediaType.APPLICATION_OCTET_STREAM)
                 .body(responseBody);
     }
-
 
     private void addToZip(List<File> files, ZipOutputStream zipOutputStream, String folderPath) throws IOException {
         for (File file : files) {
