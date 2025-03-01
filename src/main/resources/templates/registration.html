@@ -2,7 +2,7 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Registration</title>
+    <title th:text="#{templates.registration.html.title}"></title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
@@ -13,31 +13,31 @@
         </div>
         <form th:action="@{/registration}" th:object="${user}" method="post">
             <div class="mb-3">
-                <label for="InputName" class="form-label">Name</label>
+                <label for="InputName" class="form-label" th:text="#{common.user.field.name}"></label>
                 <input type="text" class="form-control" id="InputName" th:field="*{name}">
                 <p th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></p>
             </div>
             <div class="mb-3">
-                <label for="InputSurname" class="form-label">Surname</label>
+                <label for="InputSurname" class="form-label" th:text="#{common.user.field.surname}"></label>
                 <input type="text" class="form-control" id="InputSurname" th:field="*{surname}">
                 <p th:if="${#fields.hasErrors('surname')}" th:errors="*{surname}"></p>
             </div>
             <div class="mb-3">
-                <label for="InputEmail" class="form-label">Email address</label>
+                <label for="InputEmail" class="form-label" th:text="#{common.user.field.email}"></label>
                 <input type="email" class="form-control" id="InputEmail" th:field="*{email}">
                 <p th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></p>
             </div>
             <div class="mb-3">
-                <label for="InputPassword" class="form-label">Password</label>
+                <label for="InputPassword" class="form-label" th:text="#{common.user.field.password}"></label>
                 <input type="password" class="form-control" id="InputPassword" th:field="*{password}">
                 <p th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></p>
             </div>
             <div class="alert alert-danger" role="alert" th:if="${error}">
                <p th:text="${error}"></p>
             </div>
-            <button type="submit" class="btn btn-primary">Submit</button>
+            <button type="submit" class="btn btn-primary" th:text="#{templates.registration.submit}"></button>
         </form>
-        <a th:href="@{/login}" class="btn btn-primary mt-3"> Already have account?</a>
+        <a th:href="@{/login}" class="btn btn-primary mt-3" th:text="#{templates.registration.login.link}"></a>
     </div>
 </section>
 </body>
